@@ -556,7 +556,8 @@
 
   // ================= MULTI-CHANNEL & VISUALIZER ENGINE =================
   let audioCtx = null;
-  let sourceNode = null;
+  let sourceNode1 = null;
+  let sourceNode2 = null;
   let limiterNode = null;
   let splitterNode = null;
   let mergerNode = null;
@@ -602,7 +603,8 @@
         audioCtx.destination.channelInterpretation = "discrete";
       }
 
-      sourceNode = audioCtx.createMediaElementSource(activePlayer);
+      sourceNode1 = audioCtx.createMediaElementSource(activePlayer);
+      sourceNode2 = audioCtx.createMediaElementSource(standbyPlayer);
 
       limiterNode = audioCtx.createDynamicsCompressor();
       limiterNode.threshold.setValueAtTime(-1.0, audioCtx.currentTime);
@@ -657,15 +659,17 @@
   }
 
   function applyDSPRouting() {
-    if (!webAudioSupported || !audioCtx || !sourceNode || !limiterNode || !analyserNode || !splitterNode || !mergerNode) return;
+    if (!webAudioSupported || !audioCtx || !sourceNode1 || !sourceNode2 || !limiterNode || !analyserNode || !splitterNode || !mergerNode) return;
     try {
-      sourceNode.disconnect();
+      sourceNode1.disconnect();
+      sourceNode2.disconnect();
       limiterNode.disconnect();
       analyserNode.disconnect();
       splitterNode.disconnect();
       mergerNode.disconnect();
 
-      sourceNode.connect(limiterNode);
+      sourceNode1.connect(limiterNode);
+      sourceNode2.connect(limiterNode);
       limiterNode.connect(analyserNode);
       analyserNode.connect(splitterNode);
 
@@ -722,7 +726,10 @@
       mergerNode.connect(audioCtx.destination);
     } catch(err) {
       console.warn("DSP Routing fallback:", err);
-      try { sourceNode.connect(audioCtx.destination); } catch(e) {}
+      try {
+        sourceNode1.connect(audioCtx.destination);
+        sourceNode2.connect(audioCtx.destination);
+      } catch(e) {}
     }
   }
 
