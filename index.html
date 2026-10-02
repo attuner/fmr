@@ -1,0 +1,1330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>FM Radio - Feel Music Radio</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#090d16">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --bg: #090d16;
+      --card-bg: rgba(22, 27, 34, 0.88);
+      --card-border: rgba(255, 255, 255, 0.08);
+      --accent: #ff4760;
+      --accent-glow: rgba(255, 71, 96, 0.4);
+      --cyan: #00d2ff;
+      --green: #00e676;
+      --text: #f0f6fc;
+      --subtext: #8b949e;
+      --header-h: 64px;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+    
+    html, body {
+      height: 100%;
+      height: 100dvh;
+      overflow: hidden;
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    body {
+      display: flex;
+      flex-direction: column;
+      background-image: radial-gradient(circle at 50% 10%, #1c263c 0%, #090d16 85%);
+    }
+
+    .app-shell {
+      width: 100%;
+      height: 100%;
+      height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    header {
+      width: 100%;
+      height: var(--header-h);
+      min-height: var(--header-h);
+      max-height: var(--header-h);
+      padding: 0 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      backdrop-filter: blur(14px);
+      z-index: 50;
+      border-bottom: 1px solid var(--card-border);
+      background: rgba(9, 13, 22, 0.92);
+      gap: 8px;
+    }
+    .logo-group { display: flex; align-items: center; gap: 10px; overflow: hidden; }
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 800;
+      font-size: clamp(0.95rem, 2vw, 1.2rem);
+      white-space: nowrap;
+    }
+    .logo i { color: var(--accent); font-size: 1.25rem; }
+    .logo-subtitle { font-size: 0.65rem; color: var(--subtext); font-weight: 500; display: block; margin-top: -2px; }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 3px 8px;
+      border-radius: 20px;
+      font-size: 0.68rem;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+    .badge-live { background: rgba(0, 230, 118, 0.15); border: 1px solid rgba(0, 230, 118, 0.4); color: var(--green); }
+    .badge-listeners { background: rgba(0, 210, 255, 0.15); border: 1px solid rgba(0, 210, 255, 0.4); color: var(--cyan); }
+    .pulse-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); animation: pulse 1.4s infinite; }
+    @keyframes pulse { 0%, 100% { opacity: 0.3; } 50% { opacity: 1; } }
+
+    .header-actions { display: flex; align-items: center; gap: 8px; }
+    .btn-header {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid var(--card-border);
+      color: var(--text);
+      padding: 6px 12px;
+      border-radius: 12px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+    .btn-header:hover { background: rgba(255, 255, 255, 0.15); }
+
+    main {
+      width: 100%;
+      height: calc(100vh - var(--header-h));
+      height: calc(100dvh - var(--header-h));
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+    }
+
+    .content-wrapper {
+      width: 95vw;
+      width: 95dvw;
+      height: calc(95vh - var(--header-h));
+      height: calc(95dvh - var(--header-h));
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .tuner-card {
+      width: 100%;
+      height: 100%;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 24px;
+      padding: clamp(12px, 2vh, 20px) clamp(14px, 3vw, 24px);
+      text-align: center;
+      box-shadow: 0 16px 36px rgba(0,0,0,0.65);
+      backdrop-filter: blur(12px);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* Horizontal Visualizer Stage */
+    .visualizer-container {
+      width: 100%;
+      flex: 1;
+      min-height: 100px;
+      max-height: 240px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      margin-bottom: 8px;
+    }
+
+    #visualizer-canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+      border-radius: 14px;
+      background: rgba(0, 0, 0, 0.35);
+    }
+
+    .track-info-pane {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      overflow: hidden;
+      flex-shrink: 1;
+    }
+    .track-title {
+      font-size: clamp(0.95rem, 1.8vh, 1.25rem);
+      font-weight: 800;
+      margin-bottom: 2px;
+      max-width: 94%;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .track-contributor { font-size: 0.78rem; color: var(--cyan); margin-bottom: 3px; font-weight: 500; }
+    .slot-indicator { font-size: 0.68rem; color: #ffc107; margin-bottom: 3px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+    .push-indicator {
+      font-size: 0.68rem;
+      color: var(--cyan);
+      margin-bottom: 6px;
+      font-weight: 600;
+      background: rgba(0, 210, 255, 0.08);
+      padding: 2px 10px;
+      border-radius: 10px;
+    }
+    .track-desc {
+      font-size: 0.74rem;
+      color: var(--subtext);
+      line-height: 1.3;
+      margin-bottom: 8px;
+      max-height: 34px;
+      overflow: hidden;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      max-width: 92%;
+    }
+
+    /* Channel Selector Bar */
+    .audio-quality-bar {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      padding: 4px 8px;
+      border-radius: 14px;
+      margin-bottom: 8px;
+      flex-wrap: wrap;
+    }
+    .channel-selector-group {
+      display: flex;
+      align-items: center;
+      gap: 3px;
+      background: rgba(255, 255, 255, 0.05);
+      padding: 2px;
+      border-radius: 10px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .ch-btn {
+      background: transparent;
+      border: none;
+      color: var(--subtext);
+      font-size: 0.66rem;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .ch-btn.active {
+      background: var(--cyan);
+      color: #000;
+      box-shadow: 0 0 8px rgba(0, 210, 255, 0.4);
+    }
+
+    .switch-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 64px;
+      flex-shrink: 0;
+    }
+    .main-switch-btn {
+      width: clamp(58px, 8.5vh, 72px);
+      height: clamp(58px, 8.5vh, 72px);
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), #ff758c);
+      border: none;
+      color: #fff;
+      font-size: clamp(1.4rem, 2.2vw, 1.75rem);
+      cursor: pointer;
+      box-shadow: 0 8px 24px var(--accent-glow);
+      transition: transform 0.2s, box-shadow 0.2s;
+      display: none;
+    }
+    .main-switch-btn:active { transform: scale(0.92); }
+    .main-switch-btn.playing { background: linear-gradient(135deg, #10b981, #00e676); box-shadow: 0 8px 24px rgba(0, 230, 118, 0.4); }
+
+    .station-loading-pill {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 6px 14px; border-radius: 20px;
+      background: rgba(255, 255, 255, 0.05); border: 1px solid var(--card-border);
+      color: var(--subtext); font-size: 0.76rem; font-weight: 600;
+    }
+
+    /* Landscape Mode: Canvas on top occupying maximum content wrapper height */
+    @media (orientation: landscape) {
+      .tuner-card {
+        flex-direction: column;
+        justify-content: flex-start;
+        padding: 8px 16px;
+        gap: 6px;
+      }
+      .visualizer-container {
+        order: 1;
+        flex: 1 1 auto;
+        width: 100%;
+        max-height: none;
+        min-height: 52%;
+        margin-bottom: 4px;
+      }
+      .track-info-pane {
+        order: 2;
+        flex-shrink: 0;
+        width: 100%;
+        align-items: center;
+        text-align: center;
+      }
+      .track-title { font-size: clamp(0.88rem, 2.5vh, 1.15rem); margin-bottom: 1px; }
+      .track-contributor, .slot-indicator { font-size: 0.65rem; margin-bottom: 1px; }
+      .push-indicator { margin-bottom: 3px; font-size: 0.62rem; padding: 1px 8px; }
+      .track-desc { display: none; }
+      .audio-quality-bar { margin-bottom: 4px; padding: 2px 6px; }
+      .switch-container { min-height: auto; margin-top: 2px; }
+      .main-switch-btn { width: 44px; height: 44px; font-size: 1.15rem; }
+    }
+
+    .modal-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.82);
+      backdrop-filter: blur(10px); z-index: 100; display: none;
+      align-items: center; justify-content: center; padding: 16px;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal-card {
+      width: 100%; max-width: 520px; max-height: 88vh; overflow-y: auto;
+      background: #161b22; border: 1px solid var(--card-border);
+      border-radius: 20px; padding: 20px;
+    }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; padding-bottom: 8px; border-bottom: 1px solid var(--card-border); }
+    .modal-close { background: none; border: none; color: var(--subtext); font-size: 1.2rem; cursor: pointer; }
+
+    .sched-card {
+      background: rgba(255,255,255,0.03); border: 1px solid var(--card-border);
+      border-radius: 12px; padding: 10px 14px; margin-bottom: 8px;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .sched-card.active-now { border-color: var(--accent); background: rgba(255, 71, 96, 0.08); }
+
+    .form-group { margin-bottom: 12px; width: 100%; }
+    .form-group label { display: block; font-size: 0.78rem; color: var(--subtext); margin-bottom: 4px; font-weight: 600; }
+    .form-group input, .form-group textarea {
+      width: 100%; padding: 10px 12px; border-radius: 10px;
+      background: rgba(0, 0, 0, 0.35); border: 1px solid var(--card-border);
+      color: #fff; font-size: 0.88rem; outline: none;
+    }
+    .btn {
+      width: 100%; padding: 11px; border-radius: 10px; border: none;
+      font-size: 0.88rem; font-weight: 600; cursor: pointer; transition: 0.2s;
+    }
+    .btn-primary { background: var(--accent); color: #fff; }
+    .btn-secondary { background: rgba(255, 255, 255, 0.08); color: #fff; margin-top: 6px; }
+
+    .toast {
+      position: fixed; top: 16px; left: 50%; transform: translateX(-50%);
+      background: rgba(0,0,0,0.92); border: 1px solid var(--accent);
+      padding: 8px 16px; border-radius: 20px; font-size: 0.8rem; z-index: 200; display: none;
+    }
+  </style>
+</head>
+<body>
+
+<div id="toast" class="toast"></div>
+
+<div class="app-shell">
+  <header>
+    <div class="logo-group">
+      <div class="logo">
+        <i class="fa-solid fa-radio"></i>
+        <div>
+          <span id="stationNameDisplay">FM Radio</span>
+          <span class="logo-subtitle" id="stationTaglineDisplay">Feel Music Radio</span>
+        </div>
+      </div>
+      <div class="badge badge-live">
+        <span class="pulse-dot"></span>
+        <span>ON AIR</span>
+      </div>
+      <div class="badge badge-listeners">
+        <i class="fa-solid fa-headphones"></i>
+        <span id="liveListenerCountDisplay">1</span>
+      </div>
+    </div>
+
+    <div class="header-actions">
+      <button class="btn-header" onclick="openScheduleModal()">
+        <i class="fa-solid fa-calendar-days" style="color:var(--cyan);"></i>
+        <span>Guide</span>
+      </button>
+
+      <button class="btn-header" onclick="openAccountModal()">
+        <i class="fa-solid fa-user-circle"></i>
+        <span id="headerAccountLabel">Login</span>
+      </button>
+    </div>
+  </header>
+
+  <main>
+    <div class="content-wrapper">
+      <div class="tuner-card">
+        <!-- Straight Horizontal Audio Visualizer -->
+        <div class="visualizer-container">
+          <canvas id="visualizer-canvas"></canvas>
+        </div>
+
+        <div class="track-info-pane">
+          <div class="track-title" id="trackTitleDisplay">Connecting Live...</div>
+          <div class="track-contributor" id="trackContributorDisplay">Studio Quality Playback</div>
+          <div class="slot-indicator" id="currentSlotDisplay">FM Broadcast Block</div>
+          <div class="push-indicator" id="currentPushPointDisplay">Push Point: --:--</div>
+          <div class="track-desc" id="trackDescDisplay">Streaming audio in perfect timeline sync.</div>
+
+          <!-- Channel Selector Bar -->
+          <div class="audio-quality-bar">
+            <div class="channel-selector-group">
+              <span style="font-size:0.65rem; color:var(--subtext); margin-right:2px;"><i class="fa-solid fa-sliders"></i> Ch:</span>
+              <button class="ch-btn active" id="btnCh20" onclick="setAudioChannels('2.0')">2.0</button>
+              <button class="ch-btn" id="btnCh21" onclick="setAudioChannels('2.1')">2.1</button>
+              <button class="ch-btn" id="btnCh30" onclick="setAudioChannels('3.0')">3.0</button>
+              <button class="ch-btn" id="btnCh40" onclick="setAudioChannels('4.0')">4.0</button>
+              <button class="ch-btn" id="btnChSurround" onclick="setAudioChannels('5.1')">5.1</button>
+            </div>
+          </div>
+
+          <div class="switch-container">
+            <div id="stationLoadingPill" class="station-loading-pill">
+              <i class="fa-solid fa-spinner fa-spin"></i>
+              <span>Synchronizing Live Audio...</span>
+            </div>
+
+            <button id="radioPowerBtn" class="main-switch-btn" onclick="toggleRadio()">
+              <i class="fa-solid fa-power-off"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- Modal: Daily Guide -->
+<div id="scheduleModal" class="modal-overlay" onclick="closeScheduleModal(event)">
+  <div class="modal-card" onclick="event.stopPropagation()">
+    <div class="modal-header">
+      <h3><i class="fa-solid fa-calendar-days" style="color:var(--cyan); margin-right:8px;"></i>Daily FM Broadcast Schedule</h3>
+      <button class="modal-close" onclick="closeScheduleModal()"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div id="scheduleTimelineList">Loading timeline...</div>
+  </div>
+</div>
+
+<!-- Modal: Contributor Login & Upload -->
+<div id="accountModal" class="modal-overlay" onclick="closeAccountModal(event)">
+  <div class="modal-card" onclick="event.stopPropagation()">
+    <div class="modal-header">
+      <h3 id="modalTitle"><i class="fa-solid fa-user-astronaut" style="color:var(--accent); margin-right:8px;"></i>RJ & Member Portal</h3>
+      <button class="modal-close" onclick="closeAccountModal()"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+
+    <div id="authGuestBox">
+      <div id="loginFormBox">
+        <div class="form-group">
+          <label>Mobile Number</label>
+          <input type="tel" id="loginMobile" placeholder="e.g. 9876543210">
+        </div>
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" id="loginPass" placeholder="Enter password">
+        </div>
+        <button class="btn btn-primary" onclick="submitLogin()">Sign In</button>
+        <button class="btn btn-secondary" onclick="toggleAuthMode('register')">Register as Contributor</button>
+      </div>
+
+      <div id="registerFormBox" style="display:none;">
+        <div class="form-group">
+          <label>Full Name / RJ Name</label>
+          <input type="text" id="regUsername" placeholder="e.g. Grandma, Uncle Ravi">
+        </div>
+        <div class="form-group">
+          <label>Mobile Number</label>
+          <input type="tel" id="regMobile" placeholder="e.g. 9876543210">
+        </div>
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" id="regPass" placeholder="Create password">
+        </div>
+        <button class="btn btn-primary" onclick="submitRegister()">Register</button>
+        <button class="btn btn-secondary" onclick="toggleAuthMode('login')">Already registered? Sign In</button>
+      </div>
+    </div>
+
+    <div id="authMemberBox" style="display:none;">
+      <div style="background:rgba(255,255,255,0.03); border:1px solid var(--card-border); border-radius:12px; padding:12px; margin-bottom:12px; display:flex; justify-content:space-between; align-items:center;">
+        <div>
+          <div style="font-weight:700;" id="profUsername">Member</div>
+          <div style="color:var(--subtext); font-size:0.78rem;" id="profMobile">+91-0000000000</div>
+        </div>
+        <button class="btn btn-secondary" style="width:auto; padding:6px 12px; font-size:0.75rem;" onclick="logout()">Logout</button>
+      </div>
+
+      <div id="uploadAllowedSection" style="display:none;">
+        <div class="form-group">
+          <label>Audio Title</label>
+          <input type="text" id="audioTitle" placeholder="e.g. Special Track">
+        </div>
+        <div class="form-group">
+          <label>Audio File (Lossless / High Quality MP3, WAV, M4A, FLAC)</label>
+          <input type="file" id="audioFileInput" accept="audio/*" onchange="handleFileSelected(this)">
+        </div>
+        <button class="btn btn-primary" id="uploadBtn" onclick="uploadAudio()">Upload in Original Quality</button>
+      </div>
+
+      <div id="uploadLockedSection" style="text-align:center; padding:16px; color:var(--subtext); font-size:0.82rem;">
+        Pending Admin Approval to upload station audios. You can listen to the live radio anytime!
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const BACKEND_URL = "https://script.google.com/macros/s/AKfycbxIM9fWOdU4skEnXuxVe6DR6FS7z-a3AdEepC4o6AS5WQiLV_lWp0EmBXCg0rSv-Mj5Cg/exec";
+
+  function requestAppFullscreen() {
+    try {
+      const doc = document.documentElement;
+      if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+        if (doc.requestFullscreen) doc.requestFullscreen().catch(() => {});
+        else if (doc.webkitRequestFullscreen) doc.webkitRequestFullscreen().catch(() => {});
+      }
+    } catch (e) {}
+  }
+
+  let listenerId = localStorage.getItem('kr_listener_id');
+  if (!listenerId) {
+    listenerId = 'L_' + Math.random().toString(36).substring(2, 9);
+    localStorage.setItem('kr_listener_id', listenerId);
+  }
+
+  let allTracks = [];
+  let hourlySchedules = {};
+  let activePlaylist = [];
+  let currentIndex = 0;
+  let isPlaying = false;
+  let currentUser = JSON.parse(localStorage.getItem('kr_user') || 'null');
+  let selectedAudioFile = null;
+  let detectedDurationSec = 140;
+  let currentSeqVersion = null;
+  let lastPushVersion = null;
+  let currentActiveHour = -1;
+  let currentlyPlayingTrack = null;
+  let serverTimeOffset = 0;
+
+  const audioCache = {};
+  let activePlayer = new Audio();
+  let standbyPlayer = new Audio();
+  activePlayer.crossOrigin = "anonymous";
+  standbyPlayer.crossOrigin = "anonymous";
+  activePlayer.preload = "auto";
+  standbyPlayer.preload = "auto";
+  let isStandbyReady = false;
+
+  // ================= MULTI-CHANNEL & VISUALIZER ENGINE =================
+  let audioCtx = null;
+  let sourceNode = null;
+  let limiterNode = null;
+  let splitterNode = null;
+  let mergerNode = null;
+  let analyserNode = null;
+  let freqDataArray = null;
+  let currentChannelMode = '2.0';
+  let webAudioSupported = true;
+
+  const canvas = document.getElementById("visualizer-canvas");
+  const ctx = canvas.getContext("2d");
+
+  function resizeCanvas() {
+    if (!canvas) return;
+    const rect = canvas.getBoundingClientRect();
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width = rect.width * dpr;
+    canvas.height = rect.height * dpr;
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.scale(dpr, dpr);
+  }
+  window.addEventListener("resize", resizeCanvas);
+  window.addEventListener("orientationchange", () => setTimeout(resizeCanvas, 200));
+
+  function ensureAudioContext() {
+    if (audioCtx && audioCtx.state !== 'closed') {
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume().catch(() => {});
+      }
+      return;
+    }
+
+    try {
+      const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+      if (!AudioContextClass) {
+        webAudioSupported = false;
+        return;
+      }
+      audioCtx = new AudioContextClass();
+
+      if (audioCtx.destination.maxChannelCount >= 6) {
+        audioCtx.destination.channelCount = 6;
+        audioCtx.destination.channelCountMode = "explicit";
+        audioCtx.destination.channelInterpretation = "discrete";
+      }
+
+      sourceNode = audioCtx.createMediaElementSource(activePlayer);
+
+      limiterNode = audioCtx.createDynamicsCompressor();
+      limiterNode.threshold.setValueAtTime(-1.0, audioCtx.currentTime);
+      limiterNode.knee.setValueAtTime(0, audioCtx.currentTime);
+      limiterNode.ratio.setValueAtTime(20.0, audioCtx.currentTime);
+      limiterNode.attack.setValueAtTime(0.001, audioCtx.currentTime);
+      limiterNode.release.setValueAtTime(0.1, audioCtx.currentTime);
+
+      analyserNode = audioCtx.createAnalyser();
+      analyserNode.fftSize = 128;
+      analyserNode.smoothingTimeConstant = 0.82;
+      freqDataArray = new Uint8Array(analyserNode.frequencyBinCount);
+
+      splitterNode = audioCtx.createChannelSplitter(2);
+      mergerNode = audioCtx.createChannelMerger(6);
+
+      applyDSPRouting();
+    } catch(err) {
+      console.warn("AudioContext setup:", err);
+      webAudioSupported = false;
+    }
+  }
+
+  function setAudioChannels(mode) {
+    currentChannelMode = mode;
+    document.querySelectorAll('.channel-selector-group .ch-btn').forEach(b => b.classList.remove('active'));
+
+    const btnMap = {
+      '2.0': 'btnCh20',
+      '2.1': 'btnCh21',
+      '3.0': 'btnCh30',
+      '4.0': 'btnCh40',
+      '5.1': 'btnChSurround'
+    };
+
+    const targetBtn = document.getElementById(btnMap[mode]);
+    if (targetBtn) targetBtn.classList.add('active');
+
+    ensureAudioContext();
+    if (webAudioSupported && audioCtx) {
+      applyDSPRouting();
+    }
+
+    const modeLabels = {
+      '2.0': 'Stereo (2.0)',
+      '2.1': '2.1 Bass Enhanced',
+      '3.0': '3.0 Front Stage (L, C, R)',
+      '4.0': '4.0 Quadraphonic (L, R, Ls, Rs)',
+      '5.1': '5.1 Surround Sound'
+    };
+    showToast(`Switched to: ${modeLabels[mode] || mode}`);
+  }
+
+  function applyDSPRouting() {
+    if (!webAudioSupported || !audioCtx || !sourceNode || !limiterNode || !analyserNode || !splitterNode || !mergerNode) return;
+    try {
+      sourceNode.disconnect();
+      limiterNode.disconnect();
+      analyserNode.disconnect();
+      splitterNode.disconnect();
+      mergerNode.disconnect();
+
+      sourceNode.connect(limiterNode);
+      limiterNode.connect(analyserNode);
+      analyserNode.connect(splitterNode);
+
+      const mode = currentChannelMode;
+
+      if (mode === '2.0') {
+        splitterNode.connect(mergerNode, 0, 0);
+        splitterNode.connect(mergerNode, 1, 1);
+      } else if (mode === '2.1') {
+        splitterNode.connect(mergerNode, 0, 0);
+        splitterNode.connect(mergerNode, 1, 1);
+
+        const lfeFilter = audioCtx.createBiquadFilter();
+        lfeFilter.type = "lowpass";
+        lfeFilter.frequency.value = 120;
+        splitterNode.connect(lfeFilter, 0);
+        splitterNode.connect(lfeFilter, 1);
+        lfeFilter.connect(mergerNode, 0, 3);
+      } else if (mode === '3.0') {
+        splitterNode.connect(mergerNode, 0, 0);
+        splitterNode.connect(mergerNode, 1, 1);
+
+        const center = audioCtx.createGain();
+        center.gain.value = 0.7;
+        splitterNode.connect(center, 0);
+        splitterNode.connect(center, 1);
+        center.connect(mergerNode, 0, 2);
+      } else if (mode === '4.0') {
+        splitterNode.connect(mergerNode, 0, 0);
+        splitterNode.connect(mergerNode, 1, 1);
+        splitterNode.connect(mergerNode, 0, 4);
+        splitterNode.connect(mergerNode, 1, 5);
+      } else if (mode === '5.1') {
+        splitterNode.connect(mergerNode, 0, 0);
+        splitterNode.connect(mergerNode, 1, 1);
+
+        const center = audioCtx.createGain();
+        center.gain.value = 0.7;
+        splitterNode.connect(center, 0);
+        splitterNode.connect(center, 1);
+        center.connect(mergerNode, 0, 2);
+
+        const sub = audioCtx.createBiquadFilter();
+        sub.type = "lowpass";
+        sub.frequency.value = 110;
+        splitterNode.connect(sub, 0);
+        splitterNode.connect(sub, 1);
+        sub.connect(mergerNode, 0, 3);
+
+        splitterNode.connect(mergerNode, 0, 4);
+        splitterNode.connect(mergerNode, 1, 5);
+      }
+
+      mergerNode.connect(audioCtx.destination);
+    } catch(err) {
+      console.warn("DSP Routing fallback:", err);
+      try { sourceNode.connect(audioCtx.destination); } catch(e) {}
+    }
+  }
+
+  function startHorizontalVisualizerLoop() {
+    resizeCanvas();
+
+    function renderFrame() {
+      requestAnimationFrame(renderFrame);
+      if (!canvas) return;
+
+      const rect = canvas.getBoundingClientRect();
+      const width = rect.width;
+      const height = rect.height;
+      ctx.clearRect(0, 0, width, height);
+
+      let binsCount = 64;
+      let data = freqDataArray;
+
+      if (audioCtx && analyserNode && isPlaying) {
+        analyserNode.getByteFrequencyData(freqDataArray);
+        binsCount = analyserNode.frequencyBinCount;
+        data = freqDataArray;
+      } else if (isPlaying) {
+        data = new Uint8Array(binsCount);
+        for (let i = 0; i < binsCount; i++) {
+          data[i] = Math.round(50 + Math.sin(i * 0.2 + Date.now() * 0.005) * 45);
+        }
+      }
+
+      const barSpacing = 2;
+      const totalSpacing = barSpacing * (binsCount - 1);
+      const barWidth = Math.max(1, (width - totalSpacing) / binsCount);
+      const maxBarHeight = height * 0.88;
+
+      for (let i = 0; i < binsCount; i++) {
+        const amplitude = isPlaying && data ? data[i] / 255 : 0;
+        const barHeight = Math.max(2, amplitude * maxBarHeight);
+        const x = i * (barWidth + barSpacing);
+        const y = height - barHeight;
+
+        const opacity = isPlaying ? Math.max(0.2, amplitude * 0.95) : 0.08;
+        ctx.fillStyle = `rgba(0, 210, 255, ${opacity})`;
+        ctx.fillRect(x, y, barWidth, barHeight);
+      }
+
+      ctx.beginPath();
+      ctx.moveTo(0, height - 1);
+      ctx.lineTo(width, height - 1);
+      ctx.strokeStyle = isPlaying ? "rgba(0, 210, 255, 0.4)" : "rgba(255, 255, 255, 0.08)";
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+    }
+
+    renderFrame();
+  }
+
+  // ================= LIFECYCLE & BROADCAST SYNC =================
+  window.addEventListener('load', () => {
+    requestAppFullscreen();
+    fetchStationData();
+    renderAuth();
+    startHorizontalVisualizerLoop();
+
+    sendHeartbeat();
+    setInterval(sendHeartbeat, 20000);
+    setInterval(checkLiveSynchronization, 4000);
+
+    const unlockAudioAndFullscreen = () => {
+      requestAppFullscreen();
+      ensureAudioContext();
+      window.removeEventListener('click', unlockAudioAndFullscreen);
+      window.removeEventListener('keydown', unlockAudioAndFullscreen);
+      window.removeEventListener('touchstart', unlockAudioAndFullscreen);
+    };
+    window.addEventListener('click', unlockAudioAndFullscreen);
+    window.addEventListener('keydown', unlockAudioAndFullscreen);
+    window.addEventListener('touchstart', unlockAudioAndFullscreen);
+  });
+
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.innerText = msg;
+    t.style.display = 'block';
+    setTimeout(() => { t.style.display = 'none'; }, 3200);
+  }
+
+  function formatTimeHHMMSS(dateObj) {
+    let hours = dateObj.getHours();
+    const minutes = String(dateObj.getMinutes()).padStart(2, '0');
+    const seconds = String(dateObj.getSeconds()).padStart(2, '0');
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    hours = hours % 12 || 12;
+    return `${hours}:${minutes}:${seconds} ${ampm}`;
+  }
+
+  function openAccountModal() { document.getElementById('accountModal').classList.add('open'); }
+  function closeAccountModal(e) {
+    if (!e || e.target === document.getElementById('accountModal')) {
+      document.getElementById('accountModal').classList.remove('open');
+    }
+  }
+
+  function openScheduleModal() {
+    renderScheduleTimeline();
+    document.getElementById('scheduleModal').classList.add('open');
+  }
+  function closeScheduleModal(e) {
+    if (!e || e.target === document.getElementById('scheduleModal')) {
+      document.getElementById('scheduleModal').classList.remove('open');
+    }
+  }
+
+  function renderScheduleTimeline() {
+    const box = document.getElementById('scheduleTimelineList');
+    const nowHour = new Date(Date.now() + serverTimeOffset).getHours();
+    let html = '';
+
+    for (let h = 0; h <= 23; h++) {
+      const slot = hourlySchedules[String(h)];
+      const name = (slot && slot.name && slot.name.trim() !== '') ? slot.name : 'FM Broadcast Block';
+      const formattedTime = (h % 12 || 12) + ':00 ' + (h >= 12 ? 'PM' : 'AM') + ' – ' + ((h + 1) % 12 || 12) + ':00 ' + ((h + 1) >= 12 && (h + 1) < 24 ? 'PM' : 'AM');
+      const isCurrent = (h === nowHour);
+
+      html += `
+        <div class="sched-card ${isCurrent ? 'active-now' : ''}">
+          <div>
+            <div style="font-size:0.75rem; color:var(--subtext);">${formattedTime} ${isCurrent ? '• <span style="color:var(--green); font-weight:700;">LIVE ON AIR</span>' : ''}</div>
+            <div style="font-size:0.92rem; font-weight:700; color:#fff; margin-top:2px;">${escapeHtml(name)}</div>
+          </div>
+          <i class="fa-solid fa-radio" style="color:${isCurrent ? 'var(--accent)' : 'var(--subtext)'}; font-size:1.1rem;"></i>
+        </div>
+      `;
+    }
+    box.innerHTML = html;
+  }
+
+  async function sendHeartbeat() {
+    try {
+      const res = await fetch(BACKEND_URL, {
+        method: 'POST',
+        body: JSON.stringify({
+          action: "heartbeat",
+          listenerId,
+          username: currentUser ? currentUser.username : "FM Listener",
+          isPlaying
+        })
+      });
+      const data = await res.json();
+      if (data.success && typeof data.activeCount === 'number') {
+        const count = isPlaying ? Math.max(1, data.activeCount) : data.activeCount;
+        document.getElementById('liveListenerCountDisplay').innerText = `${count}`;
+      }
+    } catch(err) {}
+  }
+
+  function getSynchronizedCurrentTrackIndex(playlist) {
+    if (!playlist || playlist.length === 0) return { index: 0, seekSec: 0 };
+
+    const now = new Date(Date.now() + serverTimeOffset);
+    const elapsedSecInHour = (now.getMinutes() * 60) + now.getSeconds();
+
+    let cumulativeSec = 0;
+    for (let i = 0; i < playlist.length; i++) {
+      const duration = playlist[i].durationSec || 140;
+      if (elapsedSecInHour >= cumulativeSec && elapsedSecInHour < (cumulativeSec + duration)) {
+        return { index: i, seekSec: elapsedSecInHour - cumulativeSec };
+      }
+      cumulativeSec += duration;
+    }
+
+    const totalPlaylistDuration = cumulativeSec || 1;
+    const loopSec = elapsedSecInHour % totalPlaylistDuration;
+    let wrapCumulative = 0;
+    for (let i = 0; i < playlist.length; i++) {
+      const duration = playlist[i].durationSec || 140;
+      if (loopSec >= wrapCumulative && loopSec < (wrapCumulative + duration)) {
+        return { index: i, seekSec: loopSec - wrapCumulative };
+      }
+      wrapCumulative += duration;
+    }
+
+    return { index: 0, seekSec: 0 };
+  }
+
+  function resolveCurrentHourPlaylist() {
+    const now = new Date(Date.now() + serverTimeOffset);
+    const hour = now.getHours();
+    currentActiveHour = hour;
+
+    const slotBadge = document.getElementById('currentSlotDisplay');
+    const slot = hourlySchedules[String(hour)];
+
+    if (slot && slot.trackIds && slot.trackIds.length > 0) {
+      const scheduled = [];
+      slot.trackIds.forEach(id => {
+        const found = allTracks.find(t => t.fileId === id && t.approvalStatus === "approved");
+        if (found) scheduled.push(found);
+      });
+
+      if (scheduled.length > 0) {
+        const slotName = slot.name && slot.name.trim() !== '' ? slot.name : `${hour % 12 || 12} ${hour >= 12 ? 'PM' : 'AM'} Slot`;
+        slotBadge.innerText = `On Air: ${slotName}`;
+        return scheduled;
+      }
+    }
+
+    const approved = allTracks.filter(t => t.approvalStatus === "approved");
+    slotBadge.innerText = `On Air: Feel Music Radio`;
+    return approved.length > 0 ? approved : allTracks;
+  }
+
+  async function fetchStationData() {
+    try {
+      const res = await fetch(`${BACKEND_URL}?action=getStationData`);
+      const data = await res.json();
+      if (data.success) {
+        if (data.serverTime) serverTimeOffset = data.serverTime - Date.now();
+        allTracks = data.tracks || [];
+        hourlySchedules = data.hourly || {};
+
+        if (data.settings) {
+          currentSeqVersion = data.settings.seq_version || currentSeqVersion;
+          lastPushVersion = data.settings.push_version || lastPushVersion;
+        }
+
+        activePlaylist = resolveCurrentHourPlaylist();
+
+        if (activePlaylist.length > 0) {
+          document.getElementById('stationLoadingPill').style.display = 'none';
+          document.getElementById('radioPowerBtn').style.display = 'block';
+
+          const syncState = getSynchronizedCurrentTrackIndex(activePlaylist);
+          currentIndex = syncState.index;
+          playCurrentTrackImmediate(syncState.seekSec);
+        } else {
+          document.getElementById('stationLoadingPill').innerHTML = `<span>FM library is getting ready...</span>`;
+        }
+      }
+    } catch(e) {
+      setTimeout(fetchStationData, 4000);
+    }
+  }
+
+  async function checkLiveSynchronization() {
+    const now = new Date(Date.now() + serverTimeOffset);
+    const currentHour = now.getHours();
+
+    if (currentActiveHour !== -1 && currentHour !== currentActiveHour) {
+      currentActiveHour = currentHour;
+      activePlaylist = resolveCurrentHourPlaylist();
+      const syncState = getSynchronizedCurrentTrackIndex(activePlaylist);
+      currentIndex = syncState.index;
+      if (isPlaying && activePlaylist.length > 0) {
+        playCurrentTrackImmediate(syncState.seekSec);
+      }
+      return;
+    }
+
+    try {
+      const res = await fetch(`${BACKEND_URL}?action=getStationData`);
+      const data = await res.json();
+      if (data.success && data.settings) {
+        if (data.serverTime) serverTimeOffset = data.serverTime - Date.now();
+
+        if (data.settings.push_version && data.settings.push_version !== lastPushVersion) {
+          lastPushVersion = data.settings.push_version;
+          const pushedFileId = data.settings.pushed_track;
+          const target = allTracks.find(t => t.fileId === pushedFileId);
+          if (target) {
+            showToast("Priority Broadcast: " + target.title);
+            activePlaylist = [target, ...resolveCurrentHourPlaylist()];
+            currentIndex = 0;
+            playCurrentTrackImmediate(0);
+            return;
+          }
+        }
+
+        if (currentSeqVersion && data.settings.seq_version !== currentSeqVersion) {
+          currentSeqVersion = data.settings.seq_version;
+          allTracks = data.tracks || [];
+          hourlySchedules = data.hourly || {};
+          activePlaylist = resolveCurrentHourPlaylist();
+          const syncState = getSynchronizedCurrentTrackIndex(activePlaylist);
+          currentIndex = syncState.index;
+          if (isPlaying && activePlaylist.length > 0) {
+            playCurrentTrackImmediate(syncState.seekSec);
+          }
+        }
+      }
+    } catch(err) {}
+  }
+
+  async function resolveTrackAudio(track) {
+    if (!track) return null;
+    if (audioCache[track.fileId]) return audioCache[track.fileId];
+
+    try {
+      const res = await fetch(`${BACKEND_URL}?action=streamAudio&fileId=${encodeURIComponent(track.fileId)}`);
+      const data = await res.json();
+      if (data.success && data.dataUri) {
+        audioCache[track.fileId] = data.dataUri;
+        return data.dataUri;
+      }
+    } catch(err) {}
+    return track.streamUrl;
+  }
+
+  function setupPlayerEvents(player) {
+    player.addEventListener('timeupdate', () => {
+      if (player.duration && (player.duration - player.currentTime <= 4) && !isStandbyReady) {
+        prepareStandbyTrack();
+      }
+    });
+    player.addEventListener('ended', () => { advanceTrackInstantly(); });
+    player.addEventListener('error', () => { if (isPlaying) advanceTrackInstantly(); });
+  }
+
+  setupPlayerEvents(activePlayer);
+  setupPlayerEvents(standbyPlayer);
+
+  async function prepareStandbyTrack() {
+    if (activePlaylist.length === 0) return;
+    const nextIdx = (currentIndex + 1) % activePlaylist.length;
+    const nextTrack = activePlaylist[nextIdx];
+    const src = await resolveTrackAudio(nextTrack);
+    if (src) {
+      standbyPlayer.src = src;
+      standbyPlayer.load();
+      standbyPlayer._trackRef = nextTrack;
+      isStandbyReady = true;
+    }
+  }
+
+  async function advanceTrackInstantly() {
+    if (activePlaylist.length === 0) return;
+    currentIndex = (currentIndex + 1) % activePlaylist.length;
+
+    const temp = activePlayer;
+    activePlayer = standbyPlayer;
+    standbyPlayer = temp;
+    isStandbyReady = false;
+
+    currentlyPlayingTrack = activePlayer._trackRef || activePlaylist[currentIndex];
+
+    if (!activePlayer.src || activePlayer.src === "") {
+      const src = await resolveTrackAudio(currentlyPlayingTrack);
+      activePlayer.src = src;
+      activePlayer._trackRef = currentlyPlayingTrack;
+    }
+
+    ensureAudioContext();
+
+    activePlayer.play().catch(e => console.warn(e));
+    updateMediaSession();
+    updateTunerUI(currentlyPlayingTrack);
+  }
+
+  async function playCurrentTrackImmediate(seekSec = 0) {
+    if (!activePlaylist || activePlaylist.length === 0) return;
+    const track = activePlaylist[currentIndex];
+    const audioSource = await resolveTrackAudio(track);
+
+    activePlayer.src = audioSource;
+    activePlayer._trackRef = track;
+    currentlyPlayingTrack = track;
+    updateTunerUI(currentlyPlayingTrack);
+
+    ensureAudioContext();
+
+    const playPromise = activePlayer.play();
+    isPlaying = true;
+    sendHeartbeat();
+
+    if (playPromise !== undefined) {
+      playPromise.then(() => {
+        if (seekSec > 0 && activePlayer.duration && seekSec < activePlayer.duration) {
+          activePlayer.currentTime = seekSec;
+        }
+        isStandbyReady = false;
+        prepareStandbyTrack();
+        updateMediaSession();
+        updateTunerUI(currentlyPlayingTrack);
+      }).catch(err => {
+        isPlaying = false;
+        updateTunerUI(currentlyPlayingTrack);
+        showToast("Tap power switch to join live broadcast.");
+      });
+    }
+  }
+
+  function toggleRadio() {
+    if (activePlaylist.length === 0) return;
+
+    ensureAudioContext();
+    requestAppFullscreen();
+
+    if (isPlaying) {
+      activePlayer.pause();
+      standbyPlayer.pause();
+      isPlaying = false;
+      sendHeartbeat();
+      updateTunerUI(currentlyPlayingTrack);
+    } else {
+      const syncState = getSynchronizedCurrentTrackIndex(activePlaylist);
+      currentIndex = syncState.index;
+
+      const playPromise = activePlayer.play();
+      isPlaying = true;
+      updateTunerUI(currentlyPlayingTrack);
+      sendHeartbeat();
+
+      if (playPromise !== undefined) {
+        playPromise.then(() => {
+          if (syncState.seekSec > 0 && activePlayer.duration && syncState.seekSec < activePlayer.duration) {
+            activePlayer.currentTime = syncState.seekSec;
+          }
+          updateMediaSession();
+          prepareStandbyTrack();
+        }).catch(err => {
+          resolveTrackAudio(currentlyPlayingTrack || activePlaylist[currentIndex]).then(src => {
+            activePlayer.src = src;
+            activePlayer.play().catch(() => {});
+          });
+        });
+      }
+    }
+  }
+
+  function updateTunerUI(trackObj) {
+    const track = trackObj || currentlyPlayingTrack || (activePlaylist ? activePlaylist[currentIndex] : null);
+    const btn = document.getElementById('radioPowerBtn');
+    const title = document.getElementById('trackTitleDisplay');
+    const contrib = document.getElementById('trackContributorDisplay');
+    const desc = document.getElementById('trackDescDisplay');
+    const pushPointDisplay = document.getElementById('currentPushPointDisplay');
+
+    if (track) {
+      title.innerText = track.title;
+      contrib.innerText = "Curated by " + (track.contributor || "FM Voice");
+      desc.innerText = track.description || "Feel Music Radio";
+
+      const sync = getSynchronizedCurrentTrackIndex(activePlaylist);
+      const trackDur = track.durationSec || 140;
+      const nextPushInSec = Math.max(0, trackDur - sync.seekSec);
+      const nextPushDate = new Date(Date.now() + (nextPushInSec * 1000));
+      pushPointDisplay.innerText = `Next Push: ${formatTimeHHMMSS(nextPushDate)} (Length: ${Math.floor(trackDur / 60)}m ${trackDur % 60}s)`;
+    }
+
+    if (isPlaying) {
+      btn.classList.add('playing');
+    } else {
+      btn.classList.remove('playing');
+    }
+  }
+
+  function updateMediaSession() {
+    const track = currentlyPlayingTrack || activePlaylist[currentIndex];
+    if ('mediaSession' in navigator && track) {
+      navigator.mediaSession.metadata = new MediaMetadata({
+        title: track.title,
+        artist: track.contributor || "FM Radio",
+        album: "Feel Music Radio",
+        artwork: [{ src: 'https://cdn-icons-png.flaticon.com/512/3075/3075906.png', sizes: '512x512', type: 'image/png' }]
+      });
+      navigator.mediaSession.setActionHandler('play', () => toggleRadio());
+      navigator.mediaSession.setActionHandler('pause', () => toggleRadio());
+      navigator.mediaSession.setActionHandler('nexttrack', () => advanceTrackInstantly());
+    }
+  }
+
+  function escapeHtml(str) {
+    return String(str || "").replace(/[&<>'"]/g, 
+      tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
+    );
+  }
+
+  function toggleAuthMode(m) {
+    document.getElementById('loginFormBox').style.display = m === 'login' ? 'block' : 'none';
+    document.getElementById('registerFormBox').style.display = m === 'register' ? 'block' : 'none';
+  }
+
+  function handleFileSelected(input) {
+    if (input.files && input.files[0]) {
+      selectedAudioFile = input.files[0];
+      const a = new Audio();
+      a.src = URL.createObjectURL(selectedAudioFile);
+      a.onloadedmetadata = () => { detectedDurationSec = Math.round(a.duration) || 140; };
+      const titleInput = document.getElementById('audioTitle');
+      if (!titleInput.value.trim()) titleInput.value = selectedAudioFile.name.replace(/\.[^/.]+$/, "");
+    }
+  }
+
+  async function submitRegister() {
+    const username = document.getElementById('regUsername').value.trim();
+    const mobile = document.getElementById('regMobile').value.trim();
+    const password = document.getElementById('regPass').value.trim();
+    if (!username || !mobile || !password) return showToast("Fill all fields");
+
+    const res = await fetch(BACKEND_URL, {
+      method: 'POST',
+      body: JSON.stringify({ action: "register", username, mobile, password })
+    });
+    const d = await res.json();
+    if (d.success) {
+      currentUser = d.user;
+      localStorage.setItem('kr_user', JSON.stringify(currentUser));
+      renderAuth();
+      showToast("Registered successfully!");
+    } else {
+      showToast(d.message || "Failed");
+    }
+  }
+
+  async function submitLogin() {
+    const mobile = document.getElementById('loginMobile').value.trim();
+    const password = document.getElementById('loginPass').value.trim();
+    const res = await fetch(BACKEND_URL, {
+      method: 'POST',
+      body: JSON.stringify({ action: "login", mobile, password })
+    });
+    const d = await res.json();
+    if (d.success) {
+      currentUser = d.user;
+      localStorage.setItem('kr_user', JSON.stringify(currentUser));
+      renderAuth();
+      showToast("Welcome back, " + currentUser.username);
+    } else {
+      showToast(d.message || "Login failed");
+    }
+  }
+
+  function logout() {
+    currentUser = null;
+    localStorage.removeItem('kr_user');
+    renderAuth();
+  }
+
+  function renderAuth() {
+    const g = document.getElementById('authGuestBox');
+    const m = document.getElementById('authMemberBox');
+    const lbl = document.getElementById('headerAccountLabel');
+
+    if (!currentUser) {
+      g.style.display = 'block'; m.style.display = 'none';
+      lbl.innerText = "Login";
+    } else {
+      g.style.display = 'none'; m.style.display = 'block';
+      lbl.innerText = currentUser.username;
+      document.getElementById('profUsername').innerText = currentUser.username;
+      document.getElementById('profMobile').innerText = currentUser.mobile;
+      const ok = currentUser.status === "approved";
+      document.getElementById('uploadAllowedSection').style.display = ok ? 'block' : 'none';
+      document.getElementById('uploadLockedSection').style.display = ok ? 'none' : 'block';
+    }
+  }
+
+  async function uploadAudio() {
+    const title = document.getElementById('audioTitle').value.trim();
+    const btn = document.getElementById('uploadBtn');
+    if (!title || !selectedAudioFile) return showToast("Provide a title and select a file");
+
+    btn.disabled = true;
+    btn.innerText = "Uploading Original Quality Audio...";
+
+    const reader = new FileReader();
+    reader.onload = async function() {
+      const base64Data = reader.result.split(',')[1];
+      const res = await fetch(BACKEND_URL, {
+        method: 'POST',
+        body: JSON.stringify({
+          action: "uploadAudio",
+          mobile: currentUser.mobile,
+          username: currentUser.username,
+          title,
+          fileName: selectedAudioFile.name,
+          mimeType: selectedAudioFile.type || "audio/mpeg",
+          base64File: base64Data,
+          durationSec: detectedDurationSec
+        })
+      });
+      const d = await res.json();
+      btn.disabled = false;
+      btn.innerText = "Upload in Original Quality";
+      if (d.success) {
+        showToast("Audio uploaded successfully without compression!");
+        closeAccountModal();
+        fetchStationData();
+      } else {
+        showToast(d.message || "Upload failed");
+      }
+    };
+    reader.readAsDataURL(selectedAudioFile);
+  }
+  
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", () => {
+      navigator.serviceWorker.register("./sw.js")
+        .then((reg) => console.log("Service Worker registered:", reg.scope))
+        .catch((err) => console.warn("Service Worker registration failed:", err));
+    });
+  }
+</script>
+
+</body>
+</html>
