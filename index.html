@@ -208,44 +208,18 @@
       max-width: 92%;
     }
 
-    /* Channel Selector Bar */
-    .audio-quality-bar {
-      display: flex;
+    .audio-quality-badge {
+      display: inline-flex;
       align-items: center;
-      justify-content: center;
       gap: 6px;
-      background: rgba(0, 0, 0, 0.4);
-      border: 1px solid rgba(255, 255, 255, 0.06);
-      padding: 4px 8px;
-      border-radius: 14px;
+      font-size: 0.68rem;
+      color: var(--green);
+      background: rgba(0, 230, 118, 0.08);
+      border: 1px solid rgba(0, 230, 118, 0.25);
+      border-radius: 12px;
+      padding: 3px 10px;
       margin-bottom: 8px;
-      flex-wrap: wrap;
-    }
-    .channel-selector-group {
-      display: flex;
-      align-items: center;
-      gap: 3px;
-      background: rgba(255, 255, 255, 0.05);
-      padding: 2px;
-      border-radius: 10px;
-      flex-wrap: wrap;
-      justify-content: center;
-    }
-    .ch-btn {
-      background: transparent;
-      border: none;
-      color: var(--subtext);
-      font-size: 0.66rem;
-      font-weight: 700;
-      padding: 2px 6px;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-    .ch-btn.active {
-      background: var(--cyan);
-      color: #000;
-      box-shadow: 0 0 8px rgba(0, 210, 255, 0.4);
+      font-weight: 600;
     }
 
     .switch-container {
@@ -279,7 +253,6 @@
       color: var(--subtext); font-size: 0.76rem; font-weight: 600;
     }
 
-    /* Landscape Mode: Canvas on top occupying maximum content wrapper height */
     @media (orientation: landscape) {
       .tuner-card {
         flex-direction: column;
@@ -306,7 +279,6 @@
       .track-contributor, .slot-indicator { font-size: 0.65rem; margin-bottom: 1px; }
       .push-indicator { margin-bottom: 3px; font-size: 0.62rem; padding: 1px 8px; }
       .track-desc { display: none; }
-      .audio-quality-bar { margin-bottom: 4px; padding: 2px 6px; }
       .switch-container { min-height: auto; margin-top: 2px; }
       .main-switch-btn { width: 44px; height: 44px; font-size: 1.15rem; }
     }
@@ -405,16 +377,9 @@
           <div class="push-indicator" id="currentPushPointDisplay">Push Point: --:--</div>
           <div class="track-desc" id="trackDescDisplay">Streaming audio in perfect timeline sync.</div>
 
-          <!-- Channel Selector Bar -->
-          <div class="audio-quality-bar">
-            <div class="channel-selector-group">
-              <span style="font-size:0.65rem; color:var(--subtext); margin-right:2px;"><i class="fa-solid fa-sliders"></i> Ch:</span>
-              <button class="ch-btn active" id="btnCh20" onclick="setAudioChannels('2.0')">2.0</button>
-              <button class="ch-btn" id="btnCh21" onclick="setAudioChannels('2.1')">2.1</button>
-              <button class="ch-btn" id="btnCh30" onclick="setAudioChannels('3.0')">3.0</button>
-              <button class="ch-btn" id="btnCh40" onclick="setAudioChannels('4.0')">4.0</button>
-              <button class="ch-btn" id="btnChSurround" onclick="setAudioChannels('5.1')">5.1</button>
-            </div>
+          <div class="audio-quality-badge">
+            <i class="fa-solid fa-wave-square"></i>
+            <span>Pure Stereo Direct Master</span>
           </div>
 
           <div class="switch-container">
@@ -495,12 +460,16 @@
 
       <div id="uploadAllowedSection" style="display:none;">
         <div class="form-group">
-          <label>Audio Title</label>
-          <input type="text" id="audioTitle" placeholder="e.g. Special Track">
+          <label>Audio File (MP3, WAV, M4A, FLAC)</label>
+          <input type="file" id="audioFileInput" accept="audio/*" onchange="handleFileSelected(this)">
         </div>
         <div class="form-group">
-          <label>Audio File (Lossless / High Quality MP3, WAV, M4A, FLAC)</label>
-          <input type="file" id="audioFileInput" accept="audio/*" onchange="handleFileSelected(this)">
+          <label>Audio Title</label>
+          <input type="text" id="audioTitle" placeholder="Title will auto-fill on file select">
+        </div>
+        <div class="form-group">
+          <label>Audio Description</label>
+          <textarea id="audioDescription" rows="2" placeholder="Write a short description of this track..."></textarea>
         </div>
         <button class="btn btn-primary" id="uploadBtn" onclick="uploadAudio()">Upload in Original Quality</button>
       </div>
@@ -554,16 +523,12 @@
   standbyPlayer.preload = "auto";
   let isStandbyReady = false;
 
-  // ================= MULTI-CHANNEL & VISUALIZER ENGINE =================
+  // ================= PURE STEREO & VISUALIZER ENGINE =================
   let audioCtx = null;
   let sourceNode1 = null;
   let sourceNode2 = null;
-  let limiterNode = null;
-  let splitterNode = null;
-  let mergerNode = null;
   let analyserNode = null;
   let freqDataArray = null;
-  let currentChannelMode = '2.0';
   let webAudioSupported = true;
 
   const canvas = document.getElementById("visualizer-canvas");
@@ -597,139 +562,21 @@
       }
       audioCtx = new AudioContextClass();
 
-      if (audioCtx.destination.maxChannelCount >= 6) {
-        audioCtx.destination.channelCount = 6;
-        audioCtx.destination.channelCountMode = "explicit";
-        audioCtx.destination.channelInterpretation = "discrete";
-      }
-
       sourceNode1 = audioCtx.createMediaElementSource(activePlayer);
       sourceNode2 = audioCtx.createMediaElementSource(standbyPlayer);
-
-      limiterNode = audioCtx.createDynamicsCompressor();
-      limiterNode.threshold.setValueAtTime(-1.0, audioCtx.currentTime);
-      limiterNode.knee.setValueAtTime(0, audioCtx.currentTime);
-      limiterNode.ratio.setValueAtTime(20.0, audioCtx.currentTime);
-      limiterNode.attack.setValueAtTime(0.001, audioCtx.currentTime);
-      limiterNode.release.setValueAtTime(0.1, audioCtx.currentTime);
 
       analyserNode = audioCtx.createAnalyser();
       analyserNode.fftSize = 128;
       analyserNode.smoothingTimeConstant = 0.82;
       freqDataArray = new Uint8Array(analyserNode.frequencyBinCount);
 
-      splitterNode = audioCtx.createChannelSplitter(2);
-      mergerNode = audioCtx.createChannelMerger(6);
-
-      applyDSPRouting();
+      // Connect sources straight through analyser directly to destination (pure bit-perfect stereo)
+      sourceNode1.connect(analyserNode);
+      sourceNode2.connect(analyserNode);
+      analyserNode.connect(audioCtx.destination);
     } catch(err) {
-      console.warn("AudioContext setup:", err);
+      console.warn("Direct Stereo AudioContext setup:", err);
       webAudioSupported = false;
-    }
-  }
-
-  function setAudioChannels(mode) {
-    currentChannelMode = mode;
-    document.querySelectorAll('.channel-selector-group .ch-btn').forEach(b => b.classList.remove('active'));
-
-    const btnMap = {
-      '2.0': 'btnCh20',
-      '2.1': 'btnCh21',
-      '3.0': 'btnCh30',
-      '4.0': 'btnCh40',
-      '5.1': 'btnChSurround'
-    };
-
-    const targetBtn = document.getElementById(btnMap[mode]);
-    if (targetBtn) targetBtn.classList.add('active');
-
-    ensureAudioContext();
-    if (webAudioSupported && audioCtx) {
-      applyDSPRouting();
-    }
-
-    const modeLabels = {
-      '2.0': 'Stereo (2.0)',
-      '2.1': '2.1 Bass Enhanced',
-      '3.0': '3.0 Front Stage (L, C, R)',
-      '4.0': '4.0 Quadraphonic (L, R, Ls, Rs)',
-      '5.1': '5.1 Surround Sound'
-    };
-    showToast(`Switched to: ${modeLabels[mode] || mode}`);
-  }
-
-  function applyDSPRouting() {
-    if (!webAudioSupported || !audioCtx || !sourceNode1 || !sourceNode2 || !limiterNode || !analyserNode || !splitterNode || !mergerNode) return;
-    try {
-      sourceNode1.disconnect();
-      sourceNode2.disconnect();
-      limiterNode.disconnect();
-      analyserNode.disconnect();
-      splitterNode.disconnect();
-      mergerNode.disconnect();
-
-      sourceNode1.connect(limiterNode);
-      sourceNode2.connect(limiterNode);
-      limiterNode.connect(analyserNode);
-      analyserNode.connect(splitterNode);
-
-      const mode = currentChannelMode;
-
-      if (mode === '2.0') {
-        splitterNode.connect(mergerNode, 0, 0);
-        splitterNode.connect(mergerNode, 1, 1);
-      } else if (mode === '2.1') {
-        splitterNode.connect(mergerNode, 0, 0);
-        splitterNode.connect(mergerNode, 1, 1);
-
-        const lfeFilter = audioCtx.createBiquadFilter();
-        lfeFilter.type = "lowpass";
-        lfeFilter.frequency.value = 120;
-        splitterNode.connect(lfeFilter, 0);
-        splitterNode.connect(lfeFilter, 1);
-        lfeFilter.connect(mergerNode, 0, 3);
-      } else if (mode === '3.0') {
-        splitterNode.connect(mergerNode, 0, 0);
-        splitterNode.connect(mergerNode, 1, 1);
-
-        const center = audioCtx.createGain();
-        center.gain.value = 0.7;
-        splitterNode.connect(center, 0);
-        splitterNode.connect(center, 1);
-        center.connect(mergerNode, 0, 2);
-      } else if (mode === '4.0') {
-        splitterNode.connect(mergerNode, 0, 0);
-        splitterNode.connect(mergerNode, 1, 1);
-        splitterNode.connect(mergerNode, 0, 4);
-        splitterNode.connect(mergerNode, 1, 5);
-      } else if (mode === '5.1') {
-        splitterNode.connect(mergerNode, 0, 0);
-        splitterNode.connect(mergerNode, 1, 1);
-
-        const center = audioCtx.createGain();
-        center.gain.value = 0.7;
-        splitterNode.connect(center, 0);
-        splitterNode.connect(center, 1);
-        center.connect(mergerNode, 0, 2);
-
-        const sub = audioCtx.createBiquadFilter();
-        sub.type = "lowpass";
-        sub.frequency.value = 110;
-        splitterNode.connect(sub, 0);
-        splitterNode.connect(sub, 1);
-        sub.connect(mergerNode, 0, 3);
-
-        splitterNode.connect(mergerNode, 0, 4);
-        splitterNode.connect(mergerNode, 1, 5);
-      }
-
-      mergerNode.connect(audioCtx.destination);
-    } catch(err) {
-      console.warn("DSP Routing fallback:", err);
-      try {
-        sourceNode1.connect(audioCtx.destination);
-        sourceNode2.connect(audioCtx.destination);
-      } catch(e) {}
     }
   }
 
@@ -849,7 +696,7 @@
 
     for (let h = 0; h <= 23; h++) {
       const slot = hourlySchedules[String(h)];
-      const name = (slot && slot.name && slot.name.trim() !== '') ? slot.name : 'FM Broadcast Block';
+      const name = (slot && slot.name && slot.name.trim() !== '') ? slot.name : 'Random Plays';
       const formattedTime = (h % 12 || 12) + ':00 ' + (h >= 12 ? 'PM' : 'AM') + ' – ' + ((h + 1) % 12 || 12) + ':00 ' + ((h + 1) >= 12 && (h + 1) < 24 ? 'PM' : 'AM');
       const isCurrent = (h === nowHour);
 
@@ -891,6 +738,21 @@
     const now = new Date(Date.now() + serverTimeOffset);
     const elapsedSecInHour = (now.getMinutes() * 60) + now.getSeconds();
 
+    // If tracks have exact minute offsets defined by the admin
+    if (playlist[0] && typeof playlist[0]._scheduledStartSec === 'number') {
+      for (let i = playlist.length - 1; i >= 0; i--) {
+        const t = playlist[i];
+        if (elapsedSecInHour >= t._scheduledStartSec) {
+          const seek = elapsedSecInHour - t._scheduledStartSec;
+          const dur = t.durationSec || 140;
+          if (seek < dur) {
+            return { index: i, seekSec: seek };
+          }
+          break;
+        }
+      }
+    }
+
     let cumulativeSec = 0;
     for (let i = 0; i < playlist.length; i++) {
       const duration = playlist[i].durationSec || 140;
@@ -922,11 +784,16 @@
     const slotBadge = document.getElementById('currentSlotDisplay');
     const slot = hourlySchedules[String(hour)];
 
-    if (slot && slot.trackIds && slot.trackIds.length > 0) {
+    // Check if scheduled entries exist in this hour
+    if (slot && slot.trackEntries && slot.trackEntries.length > 0) {
       const scheduled = [];
-      slot.trackIds.forEach(id => {
-        const found = allTracks.find(t => t.fileId === id && t.approvalStatus === "approved");
-        if (found) scheduled.push(found);
+      slot.trackEntries.forEach(entry => {
+        const fileId = typeof entry === 'string' ? entry : entry.fileId;
+        const startSec = (typeof entry === 'object' && typeof entry.startSec === 'number') ? entry.startSec : 0;
+        const found = allTracks.find(t => t.fileId === fileId && t.approvalStatus === "approved");
+        if (found) {
+          scheduled.push(Object.assign({}, found, { _scheduledStartSec: startSec }));
+        }
       });
 
       if (scheduled.length > 0) {
@@ -934,10 +801,27 @@
         slotBadge.innerText = `On Air: ${slotName}`;
         return scheduled;
       }
+    } else if (slot && slot.trackIds && slot.trackIds.length > 0) {
+      // Legacy fallback
+      const scheduled = [];
+      slot.trackIds.forEach(id => {
+        const found = allTracks.find(t => t.fileId === id && t.approvalStatus === "approved");
+        if (found) scheduled.push(found);
+      });
+      if (scheduled.length > 0) {
+        const slotName = slot.name && slot.name.trim() !== '' ? slot.name : `${hour % 12 || 12} ${hour >= 12 ? 'PM' : 'AM'} Slot`;
+        slotBadge.innerText = `On Air: ${slotName}`;
+        return scheduled;
+      }
     }
 
+    // In unscheduled timings, strictly play approved tracks from the "Random Plays" category
+    const randomPlays = allTracks.filter(t => t.approvalStatus === "approved" && t.category === "Random Plays");
+    slotBadge.innerText = `On Air: Random Plays`;
+    if (randomPlays.length > 0) return randomPlays;
+
+    // Secondary fallback to any approved tracks if random plays pool is completely empty
     const approved = allTracks.filter(t => t.approvalStatus === "approved");
-    slotBadge.innerText = `On Air: Feel Music Radio`;
     return approved.length > 0 ? approved : allTracks;
   }
 
@@ -1217,8 +1101,10 @@
       const a = new Audio();
       a.src = URL.createObjectURL(selectedAudioFile);
       a.onloadedmetadata = () => { detectedDurationSec = Math.round(a.duration) || 140; };
+      
+      // Auto-fill title with uploaded file content/name
       const titleInput = document.getElementById('audioTitle');
-      if (!titleInput.value.trim()) titleInput.value = selectedAudioFile.name.replace(/\.[^/.]+$/, "");
+      titleInput.value = selectedAudioFile.name.replace(/\.[^/.]+$/, "");
     }
   }
 
@@ -1287,8 +1173,13 @@
   }
 
   async function uploadAudio() {
-    const title = document.getElementById('audioTitle').value.trim();
+    const titleInput = document.getElementById('audioTitle');
+    const descInput = document.getElementById('audioDescription');
+    const fileInput = document.getElementById('audioFileInput');
+    const title = titleInput.value.trim();
+    const description = descInput ? descInput.value.trim() : "";
     const btn = document.getElementById('uploadBtn');
+
     if (!title || !selectedAudioFile) return showToast("Provide a title and select a file");
 
     btn.disabled = true;
@@ -1304,6 +1195,7 @@
           mobile: currentUser.mobile,
           username: currentUser.username,
           title,
+          description,
           fileName: selectedAudioFile.name,
           mimeType: selectedAudioFile.type || "audio/mpeg",
           base64File: base64Data,
@@ -1315,6 +1207,11 @@
       btn.innerText = "Upload in Original Quality";
       if (d.success) {
         showToast("Audio uploaded successfully without compression!");
+        // Clear all inputs after successful upload
+        titleInput.value = "";
+        if (descInput) descInput.value = "";
+        fileInput.value = "";
+        selectedAudioFile = null;
         closeAccountModal();
         fetchStationData();
       } else {

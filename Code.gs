@@ -3,9 +3,9 @@
  * Studio Master High-Fidelity Audio Stream & Broadcast Sync Engine
  */
 
-const FOLDER_NAME = "The Big Family Radio";
+const FOLDER_NAME = "Feel Music Radio";
 const ADMIN_SECRET_KEY = "admin123";
-const DEFAULT_STATION_NAME = "The Big Family Radio";
+const DEFAULT_STATION_NAME = "FM Radio";
 
 function doGet(e) {
   try {
@@ -89,8 +89,6 @@ function doPost(e) {
     else if (action === "adminSaveSettings") response = handleSaveSettings(contents);
     else if (action === "heartbeat") response = handleHeartbeat(contents);
     else if (action === "saveHourlySchedule") response = handleSaveHourlySchedule(contents);
-    else if (action === "autoFillDivision") response = handleAutoFillDivision(contents);
-    else if (action === "autoScheduleAllRandom") response = handleAutoScheduleAllRandom(contents);
     else if (action === "clearAllHourlySlots") response = handleClearAllHourlySlots(contents);
     else if (action === "adminPushTrack") response = handlePushTrack(contents);
     else if (action === "adminPushLiveMic") response = handlePushLiveMic(contents);
@@ -211,16 +209,23 @@ function handleAudioUpload(data) {
   const fileName = data.fileName || `${title}.mp3`;
   const mimeType = data.mimeType || "audio/mpeg";
   const durationSec = Math.round(Number(data.durationSec)) || 140;
+  const requestedCat = String(data.category || "Admin Selections").trim();
 
   if (!base64File) return { success: false, message: "Missing audio data" };
 
-  const { usersSheet, tracksSheet } = getSheets();
-  const userRows = usersSheet.getDataRange().getValues();
-  let isApproved = false;
-  for (let i = 1; i < userRows.length; i++) {
-    if (String(userRows[i][1]).trim() === mobile && String(userRows[i][3]).trim() === "approved") {
-      isApproved = true;
-      break;
+  const { usersSheet, tracksSheet, settingsSheet } = getSheets();
+
+  // If uploaded directly by admin portal
+  const isAdmin = (mobile === "AdminStudio");
+  let isApproved = isAdmin;
+
+  if (!isAdmin) {
+    const userRows = usersSheet.getDataRange().getValues();
+    for (let i = 1; i < userRows.length; i++) {
+      if (String(userRows[i][1]).trim() === mobile && String(userRows[i][3]).trim() === "approved") {
+        isApproved = true;
+        break;
+      }
     }
   }
 
@@ -235,13 +240,17 @@ function handleAudioUpload(data) {
   const fileId = file.getId();
   const streamUrl = `https://drive.google.com/uc?export=download&id=${fileId}`;
   const createdAt = new Date().toISOString();
-  const trackCat = "Admin Selections";
-  const approvalStatus = "pending";
+  const trackCat = isAdmin ? requestedCat : "Admin Selections";
+  const approvalStatus = isAdmin ? "approved" : "pending";
 
   const trackRows = tracksSheet.getDataRange().getValues();
   const nextSeq = trackRows.length;
 
   tracksSheet.appendRow([nextSeq, title, description, username, fileId, streamUrl, createdAt, trackCat, approvalStatus, durationSec]);
+
+  if (isAdmin) {
+    setSettingValue(settingsSheet, "seq_version", String(Date.now()));
+  }
 
   return {
     success: true,
@@ -270,170 +279,6 @@ function handleClearAllHourlySlots(data) {
   return { success: true, message: "All hourly slots cleared successfully!", version: newVersion };
 }
 
-// ----------------- AUTO-SCHEDULE ALL 24 SLOTS FROM RANDOM PLAYS -----------------
-
-function handleAutoScheduleAllRandom(data) {
-  data = data || {};
-  if (data.adminKey !== ADMIN_SECRET_KEY) return { success: false, message: "Unauthorized" };
-
-  const { tracksSheet, hourlySheet, settingsSheet } = getSheets();
-  const trackRows = tracksSheet.getDataRange().getValues();
-  const randomPlayTracks = [];
-
-  for (let i = 1; i < trackRows.length; i++) {
-    const fileId = String(trackRows[i][4] || "").trim();
-    const cat = String(trackRows[i][7] || "Admin Selections").trim();
-    const app = String(trackRows[i][8] || "pending").trim();
-    const duration = Math.round(Number(trackRows[i][9])) || 180;
-
-    if (fileId && app === "approved" && cat === "Random Plays") {
-      randomPlayTracks.push({ fileId, duration });
-    }
-  }
-
-  let pool = randomPlayTracks;
-  if (pool.length === 0) {
-    for (let i = 1; i < trackRows.length; i++) {
-      const fileId = String(trackRows[i][4] || "").trim();
-      const app = String(trackRows[i][8] || "pending").trim();
-      const duration = Math.round(Number(trackRows[i][9])) || 180;
-      if (fileId && app === "approved") {
-        pool.push({ fileId, duration });
-      }
-    }
-  }
-
-  if (pool.length === 0) {
-    return { success: false, message: "No approved audios found in library." };
-  }
-
-  hourlySheet.clearContents();
-  hourlySheet.appendRow(["Hour", "SlotName", "TrackIdsJson"]);
-
-  for (let h = 0; h <= 23; h++) {
-    const shuffled = shuffleArray([...pool]);
-    const hourTrackIds = [];
-    let secTotal = 0;
-    let idx = 0;
-
-    while (secTotal < 3600 && shuffled.length > 0 && idx < 40) {
-      const t = shuffled[idx % shuffled.length];
-      hourTrackIds.push(t.fileId);
-      secTotal += t.duration;
-      idx++;
-    }
-
-    const dispTime = (h % 12 || 12) + ':00 ' + (h >= 12 ? 'PM' : 'AM');
-    const slotName = `Random Melodies (${dispTime})`;
-    hourlySheet.appendRow([h, slotName, JSON.stringify(hourTrackIds)]);
-  }
-
-  const newVersion = String(Date.now());
-  setSettingValue(settingsSheet, "seq_version", newVersion);
-
-  return { success: true, message: "All 24 hourly slots successfully populated with Random Plays!", version: newVersion };
-}
-
-// ----------------- AUTO-FILL BY REAL TIME SECONDS -----------------
-
-function handleAutoFillDivision(data) {
-  data = data || {};
-  if (data.adminKey !== ADMIN_SECRET_KEY) return { success: false, message: "Unauthorized" };
-
-  const divId = Number(data.divisionId);
-  const hoursMap = {
-    1: [5, 6, 7, 8, 9, 10],      // Morning
-    2: [11, 12, 13, 14, 15, 16], // Afternoon
-    3: [17, 18, 19, 20, 21, 22], // Evening
-    4: [23, 0, 1, 2, 3, 4]       // Night
-  };
-
-  const targetHours = hoursMap[divId];
-  if (!targetHours) return { success: false, message: "Invalid block ID (1-4)" };
-
-  const { tracksSheet, hourlySheet, settingsSheet } = getSheets();
-  const trackRows = tracksSheet.getDataRange().getValues();
-
-  const adminSelections = [];
-  const randomPlays = [];
-
-  for (let i = 1; i < trackRows.length; i++) {
-    const fileId = String(trackRows[i][4] || "").trim();
-    const cat = String(trackRows[i][7] || "Admin Selections").trim();
-    const app = String(trackRows[i][8] || "pending").trim();
-    const duration = Math.round(Number(trackRows[i][9])) || 180;
-
-    if (fileId && app === "approved") {
-      const item = { fileId, duration };
-      if (cat === "Random Plays") randomPlays.push(item);
-      else adminSelections.push(item);
-    }
-  }
-
-  if (adminSelections.length === 0 && randomPlays.length === 0) {
-    return { success: false, message: "No approved audios available in the library." };
-  }
-
-  const existingSchedules = getHourlySchedules();
-
-  targetHours.forEach(h => {
-    const shuffledAdmin = shuffleArray([...(adminSelections.length > 0 ? adminSelections : randomPlays)]);
-    const shuffledRandom = shuffleArray([...(randomPlays.length > 0 ? randomPlays : adminSelections)]);
-
-    const hourTrackIds = [];
-    let secA = 0, idxA = 0;
-    while (secA < 2400 && shuffledAdmin.length > 0 && idxA < 40) {
-      const t = shuffledAdmin[idxA % shuffledAdmin.length];
-      hourTrackIds.push(t.fileId);
-      secA += t.duration;
-      idxA++;
-    }
-
-    let secR = 0, idxR = 0;
-    while (secR < 1200 && shuffledRandom.length > 0 && idxR < 30) {
-      const t = shuffledRandom[idxR % shuffledRandom.length];
-      hourTrackIds.push(t.fileId);
-      secR += t.duration;
-      idxR++;
-    }
-
-    const divNames = {
-      1: "Morning Family Block",
-      2: "Afternoon Family Block",
-      3: "Evening Gathering Block",
-      4: "Night Lullaby Block"
-    };
-
-    existingSchedules[String(h)] = {
-      name: `${divNames[divId]} (${h % 12 || 12} ${h >= 12 ? 'PM' : 'AM'})`,
-      trackIds: hourTrackIds
-    };
-  });
-
-  hourlySheet.clearContents();
-  hourlySheet.appendRow(["Hour", "SlotName", "TrackIdsJson"]);
-
-  for (let hr = 0; hr <= 23; hr++) {
-    const slot = existingSchedules[String(hr)] || { name: "", trackIds: [] };
-    hourlySheet.appendRow([hr, slot.name || "", JSON.stringify(slot.trackIds || [])]);
-  }
-
-  const newVersion = String(Date.now());
-  setSettingValue(settingsSheet, "seq_version", newVersion);
-
-  return { success: true, message: `Block ${divId} filled across hours ${targetHours.join(', ')}!`, version: newVersion };
-}
-
-function shuffleArray(arr) {
-  for (let i = arr.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    const temp = arr[i];
-    arr[i] = arr[j];
-    arr[j] = temp;
-  }
-  return arr;
-}
-
 // ----------------- HOURLY SCHEDULE & ADMIN HANDLERS -----------------
 
 function handleSaveHourlySchedule(data) {
@@ -446,8 +291,9 @@ function handleSaveHourlySchedule(data) {
   hourlySheet.appendRow(["Hour", "SlotName", "TrackIdsJson"]);
 
   for (let h = 0; h <= 23; h++) {
-    const slot = schedules[String(h)] || { name: "", trackIds: [] };
-    hourlySheet.appendRow([h, slot.name || "", JSON.stringify(slot.trackIds || [])]);
+    const slot = schedules[String(h)] || { name: "", trackEntries: [] };
+    const entries = slot.trackEntries || [];
+    hourlySheet.appendRow([h, slot.name || "", JSON.stringify(entries)]);
   }
 
   const newVersion = String(Date.now());
@@ -464,12 +310,23 @@ function getHourlySchedules() {
   for (let i = 1; i < rows.length; i++) {
     if (rows[i][0] !== "") {
       try {
-        schedules[String(rows[i][0])] = {
-          name: String(rows[i][1] || ""),
-          trackIds: JSON.parse(rows[i][2] || "[]")
-        };
+        const parsed = JSON.parse(rows[i][2] || "[]");
+        if (parsed.length > 0 && typeof parsed[0] === 'object' && parsed[0].fileId) {
+          schedules[String(rows[i][0])] = {
+            name: String(rows[i][1] || ""),
+            trackEntries: parsed,
+            trackIds: parsed.map(p => p.fileId)
+          };
+        } else {
+          // Legacy string array
+          schedules[String(rows[i][0])] = {
+            name: String(rows[i][1] || ""),
+            trackIds: parsed,
+            trackEntries: parsed.map((id, idx) => ({ fileId: id, startSec: idx * 140 }))
+          };
+        }
       } catch(e) {
-        schedules[String(rows[i][0])] = { name: String(rows[i][1] || ""), trackIds: [] };
+        schedules[String(rows[i][0])] = { name: String(rows[i][1] || ""), trackIds: [], trackEntries: [] };
       }
     }
   }
