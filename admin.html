@@ -149,131 +149,22 @@
     .btn-primary { background: var(--accent); color: #fff; }
     .btn-cyan { background: var(--cyan); color: #000; }
     .btn-green { background: var(--green); color: #000; }
+    .btn-purple { background: linear-gradient(135deg, #a855f7, #6366f1); color: #fff; }
     .btn-danger { background: #e63946; color: #fff; }
     .btn-secondary { background: rgba(255, 255, 255, 0.08); color: #fff; }
     .btn-sm { padding: 6px 12px; font-size: 0.76rem; border-radius: 6px; }
-
-    .slot-row {
-      background: var(--surface-card);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 16px;
-      margin-bottom: 14px;
-      transition: border-color 0.2s;
-    }
-    .slot-row.active-hour { border-color: var(--cyan); box-shadow: 0 0 16px rgba(0, 210, 255, 0.12); }
-    .slot-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 10px;
-      padding-bottom: 10px;
-      margin-bottom: 10px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-    }
-    .slot-title-group { display: flex; align-items: center; gap: 10px; }
-    .slot-badge {
-      font-size: 0.8rem;
-      font-weight: 700;
-      padding: 4px 10px;
-      border-radius: 6px;
-      background: rgba(255, 255, 255, 0.08);
-      color: #fff;
-    }
-    .slot-badge.live { background: rgba(0, 230, 118, 0.15); color: var(--green); border: 1px solid rgba(0, 230, 118, 0.4); }
-    .slot-name-field {
-      background: #090d16;
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      color: #fff;
-      padding: 6px 10px;
-      font-size: 0.82rem;
-      width: 220px;
-    }
-
-    .slot-inline-add-bar {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      background: rgba(0, 0, 0, 0.25);
-      border: 1px solid rgba(255, 255, 255, 0.05);
-      border-radius: 8px;
-      padding: 8px 10px;
-      margin-bottom: 10px;
-      flex-wrap: wrap;
-    }
-    .slot-search-input {
-      flex: 1;
-      min-width: 140px;
-      background: #090d16;
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      padding: 5px 8px;
-      font-size: 0.78rem;
-      color: #fff;
-      outline: none;
-    }
-    .slot-pick-select {
-      flex: 2;
-      min-width: 180px;
-      background: #090d16;
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      padding: 5px 8px;
-      font-size: 0.78rem;
-      color: #fff;
-      outline: none;
-    }
-    .slot-exact-time-input {
-      width: 80px;
-      background: #090d16;
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      padding: 5px 8px;
-      font-size: 0.78rem;
-      color: var(--cyan);
-      text-align: center;
-      outline: none;
-    }
-
-    .timeline-container { display: flex; flex-direction: column; gap: 6px; }
-    .track-chip {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      background: rgba(255, 255, 255, 0.03);
-      border: 1px solid rgba(255, 255, 255, 0.06);
-      border-radius: 8px;
-      padding: 8px 12px;
-      cursor: pointer;
-      transition: all 0.15s;
-    }
-    .track-chip:hover { background: rgba(0, 210, 255, 0.06); border-color: rgba(0, 210, 255, 0.3); }
-    .chip-left { display: flex; align-items: center; gap: 10px; overflow: hidden; }
-    .chip-time-point {
-      font-family: monospace;
-      font-size: 0.78rem;
-      background: rgba(0, 210, 255, 0.12);
-      color: var(--cyan);
-      padding: 3px 8px;
-      border-radius: 6px;
-      white-space: nowrap;
-      font-weight: 700;
-    }
-    .chip-title {
-      font-size: 0.85rem;
-      font-weight: 600;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    .chip-dur { color: var(--sub); font-size: 0.75rem; margin-left: 6px; }
 
     .table-box { width: 100%; overflow-x: auto; border: 1px solid var(--border); border-radius: 10px; }
     table { width: 100%; border-collapse: collapse; font-size: 0.86rem; }
     th, td { padding: 12px 14px; text-align: left; border-bottom: 1px solid var(--border); }
     th { color: var(--sub); font-size: 0.72rem; text-transform: uppercase; background: var(--surface-card); }
+
+    .form-group { margin-bottom: 14px; }
+    .form-group label { display: block; font-size: 0.78rem; color: var(--sub); margin-bottom: 6px; }
+    .form-group input, .form-group select, .form-group textarea {
+      width: 100%; padding: 10px 12px; background: #090d16; border: 1px solid var(--border);
+      border-radius: 8px; color: #fff; font-size: 0.88rem; outline: none;
+    }
 
     .modal-overlay {
       position: fixed; inset: 0; background: rgba(0,0,0,0.8);
@@ -287,13 +178,6 @@
       box-shadow: 0 20px 40px rgba(0,0,0,0.8);
     }
 
-    .form-group { margin-bottom: 14px; }
-    .form-group label { display: block; font-size: 0.78rem; color: var(--sub); margin-bottom: 6px; }
-    .form-group input, .form-group select, .form-group textarea {
-      width: 100%; padding: 10px 12px; background: #090d16; border: 1px solid var(--border);
-      border-radius: 8px; color: #fff; font-size: 0.88rem; outline: none;
-    }
-
     .toast {
       position: fixed; top: 20px; right: 20px; background: var(--accent);
       color: #fff; padding: 10px 18px; border-radius: 20px; font-size: 0.85rem;
@@ -305,28 +189,15 @@
 
 <div id="toast" class="toast"></div>
 
-<!-- Track Replacement/Modification Modal -->
-<div id="replaceModal" class="modal-overlay" onclick="closeReplaceModal(event)">
+<!-- Audio Preview Modal -->
+<div id="previewModal" class="modal-overlay" onclick="closePreviewModal(event)">
   <div class="modal-card" onclick="event.stopPropagation()">
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
-      <h3 style="font-size:1.05rem;"><i class="fa-solid fa-arrow-right-arrow-left" style="color:var(--cyan); margin-right:8px;"></i>Replace / Modify Audio</h3>
-      <button onclick="closeReplaceModal()" style="background:none; border:none; color:var(--sub); font-size:1.2rem; cursor:pointer;"><i class="fa-solid fa-xmark"></i></button>
+      <h3 style="font-size:1.05rem;"><i class="fa-solid fa-play" style="color:var(--cyan); margin-right:8px;"></i>Preview Audio Track</h3>
+      <button onclick="closePreviewModal()" style="background:none; border:none; color:var(--sub); font-size:1.2rem; cursor:pointer;"><i class="fa-solid fa-xmark"></i></button>
     </div>
-    <div class="form-group">
-      <label>Choose Audio Track</label>
-      <select id="modalTrackSelector"></select>
-    </div>
-    <div class="form-group">
-      <label>Exact Start Time In Hour (MM:SS, e.g. 05:00)</label>
-      <input type="text" id="modalTrackExactTime" placeholder="MM:SS (e.g. 00:00)">
-    </div>
-    <div style="display:flex; justify-content:space-between; gap:10px; margin-top:20px;">
-      <button class="btn btn-danger btn-sm" onclick="deleteTargetTrackFromSlot()"><i class="fa-solid fa-trash"></i> Remove</button>
-      <div style="display:flex; gap:8px;">
-        <button class="btn btn-secondary btn-sm" onclick="closeReplaceModal()">Cancel</button>
-        <button class="btn btn-cyan btn-sm" onclick="confirmTrackReplacement()"><i class="fa-solid fa-check"></i> Apply Audio</button>
-      </div>
-    </div>
+    <div id="previewTrackInfo" style="margin-bottom:12px; font-size:0.9rem; font-weight:600;"></div>
+    <audio id="previewAudioPlayer" controls style="width:100%; margin-top:8px; outline:none;"></audio>
   </div>
 </div>
 
@@ -367,71 +238,70 @@
 
     <div class="global-search-bar">
       <i class="fa-solid fa-magnifying-glass"></i>
-      <input type="text" id="globalOmniSearch" placeholder="Omni-Search across all slots, tracks, approvals, and listeners..." oninput="handleGlobalSearch(this.value)">
+      <input type="text" id="globalOmniSearch" placeholder="Omni-Search across schedules, tracks, approvals, and listeners..." oninput="handleGlobalSearch(this.value)">
       <button class="search-clear-btn" onclick="clearGlobalSearch()"><i class="fa-solid fa-xmark"></i></button>
     </div>
 
     <!-- Navigation Tabs -->
     <nav class="nav-tabs">
-      <button class="tab-btn active" id="tabBtnSlots" onclick="switchTab('slotsTab', this)"><i class="fa-solid fa-clock"></i> 24-Hr Hourly Timeline</button>
+      <button class="tab-btn active" id="tabBtnSched" onclick="switchTab('scheduledTab', this)"><i class="fa-solid fa-calendar-check"></i> Scheduled Play Timings</button>
       <button class="tab-btn" id="tabBtnLib" onclick="switchTab('libraryTab', this)"><i class="fa-solid fa-music"></i> Audio Library & Push</button>
-      <button class="tab-btn" id="tabBtnAppr" onclick="switchTab('approvalsTab', this)"><i class="fa-solid fa-check-double"></i> Approvals</button>
+      <button class="tab-btn" id="tabBtnUpload" onclick="switchTab('uploadTab', this)"><i class="fa-solid fa-cloud-arrow-up"></i> Admin Upload</button>
+      <button class="tab-btn" id="tabBtnAppr" onclick="switchTab('approvalsTab', this)"><i class="fa-solid fa-check-double"></i> Approvals & Preview</button>
       <button class="tab-btn" id="tabBtnLive" onclick="switchTab('liveTab', this)"><i class="fa-solid fa-headphones"></i> Listeners & Family</button>
       <button class="tab-btn" id="tabBtnSettings" onclick="switchTab('settingsTab', this)"><i class="fa-solid fa-sliders"></i> Settings</button>
     </nav>
 
-    <!-- TAB 1: 24-HOUR HOURLY TIMELINE ORGANIZER -->
-    <section id="slotsTab" class="tab-content active">
+    <!-- TAB 1: SCHEDULED PLAY TIMINGS (No 24h slots) -->
+    <section id="scheduledTab" class="tab-content active">
       <div class="panel">
-        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:14px;">
-          <div>
-            <h2 style="font-size:1.15rem;"><i class="fa-solid fa-timeline" style="color:var(--cyan); margin-right:8px;"></i>Hourly Push Points Timeline</h2>
-            <p style="font-size:0.8rem; color:var(--sub);">Select exact play time (MM:SS) for any audio inside each hourly slot.</p>
+        <h2 style="font-size:1.15rem; margin-bottom:6px;"><i class="fa-solid fa-calendar-plus" style="color:var(--cyan); margin-right:8px;"></i>Schedule Audio by Exact Time</h2>
+        <p style="font-size:0.8rem; color:var(--sub); margin-bottom:16px;">Schedule an audio to play at an exact time. Only specifically scheduled audios are listed.</p>
+
+        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:12px; margin-bottom:14px; background:var(--surface-card); padding:16px; border-radius:12px; border:1px solid var(--border);">
+          <div class="form-group" style="margin:0;">
+            <label>Exact Play Time (HH:MM)</label>
+            <input type="time" id="schedExactTime">
           </div>
-          <div style="display:flex; gap:8px; flex-wrap:wrap;">
-            <button class="btn btn-danger btn-sm" onclick="triggerClearAllSlots()"><i class="fa-solid fa-trash-can"></i> Clear All Slots</button>
-            <button class="btn btn-primary btn-sm" onclick="saveHourlySlots()"><i class="fa-solid fa-floppy-disk"></i> Save Broadcast Schedule</button>
+          <div class="form-group" style="margin:0;">
+            <label>Broadcast Slot / Event Name</label>
+            <input type="text" id="schedSlotName" placeholder="e.g. Morning Bhajans, Late Night Jazz">
+          </div>
+          <div class="form-group" style="margin:0;">
+            <label>Select Audio from Library</label>
+            <select id="schedTrackSelect"></select>
+          </div>
+          <div style="display:flex; align-items:flex-end;">
+            <button class="btn btn-green" style="width:100%; height:40px; justify-content:center;" onclick="addScheduledPlay()"><i class="fa-solid fa-plus"></i> Push Schedule</button>
           </div>
         </div>
 
-        <div id="hourlySlotsGrid">Loading timeline...</div>
+        <h3 style="font-size:0.95rem; margin-bottom:10px; margin-top:20px;">Active Scheduled Play Timings</h3>
+        <div class="table-box">
+          <table>
+            <thead>
+              <tr>
+                <th>Exact Time</th>
+                <th>Slot Name</th>
+                <th>Scheduled Audio</th>
+                <th>Duration</th>
+                <th>Category</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="scheduledTableBody">
+              <tr><td colspan="6" style="text-align:center; color:var(--sub);">No scheduled audios found.</td></tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </section>
 
-    <!-- TAB 2: LIBRARY, ADMIN UPLOAD & LIVE PUSH -->
+    <!-- TAB 2: LIBRARY & LIVE INSTANT PUSH -->
     <section id="libraryTab" class="tab-content">
-      
-      <!-- Admin Single & Bulk Upload Panel -->
-      <div class="panel" style="border-left: 4px solid var(--cyan);">
-        <h2 style="font-size:1.15rem; margin-bottom:4px;"><i class="fa-solid fa-cloud-arrow-up" style="color:var(--cyan); margin-right:8px;"></i>Upload Audios (Single or Multiple)</h2>
-        <p style="font-size:0.8rem; color:var(--sub); margin-bottom:14px;">Upload one or multiple master audios at once. Automatic high fidelity file intake.</p>
-        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap:12px; margin-bottom:12px;">
-          <div>
-            <label style="display:block; font-size:0.75rem; color:var(--sub); margin-bottom:4px; font-weight:600;">Category For Uploads</label>
-            <select id="adminUploadCategory" style="width:100%; padding:9px; background:#090d16; border:1px solid var(--border); border-radius:8px; color:#fff; font-size:0.85rem;">
-              <option value="Admin Selections">Admin Selections (Scheduled Playlist)</option>
-              <option value="Random Plays">Random Plays (Non-scheduled timings)</option>
-            </select>
-          </div>
-          <div>
-            <label style="display:block; font-size:0.75rem; color:var(--sub); margin-bottom:4px; font-weight:600;">Select Audio Files (Multiple Supported)</label>
-            <input type="file" id="adminMultipleAudioInput" accept="audio/*" multiple style="width:100%; padding:7px; background:#090d16; border:1px solid var(--border); border-radius:8px; color:#fff; font-size:0.85rem;">
-          </div>
-        </div>
-        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
-          <button id="adminBatchUploadBtn" class="btn btn-cyan btn-sm" onclick="uploadAudiosBatch()"><i class="fa-solid fa-upload"></i> Start Uploading Audios</button>
-          <span id="batchUploadStatus" style="font-size:0.82rem; color:var(--sub);"></span>
-        </div>
-      </div>
-
       <div class="panel">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; flex-wrap:wrap; gap:10px;">
-          <div>
-            <h2 style="font-size:1.15rem;"><i class="fa-solid fa-compact-disc" style="color:var(--accent); margin-right:8px;"></i>Chronological Library & Urgent Push</h2>
-            <p style="font-size:0.8rem; color:var(--sub);">All approved audios. Pushing a track immediately broadcasts it across all radios.</p>
-          </div>
-        </div>
-
+        <h2 style="font-size:1.15rem; margin-bottom:4px;"><i class="fa-solid fa-compact-disc" style="color:var(--accent); margin-right:8px;"></i>Audio Library & Urgent Live Push</h2>
+        <p style="font-size:0.8rem; color:var(--sub); margin-bottom:14px;">Approved audios. Pushing a track immediately broadcasts it across all listeners.</p>
         <div id="libraryList">Loading library...</div>
       </div>
 
@@ -447,25 +317,43 @@
       </div>
     </section>
 
-    <!-- TAB 3: AUDIO APPROVALS -->
+    <!-- TAB 3: ADMIN MULTIPLE AUDIO UPLOADS -->
+    <section id="uploadTab" class="tab-content">
+      <div class="panel">
+        <h2 style="font-size:1.15rem; margin-bottom:6px;"><i class="fa-solid fa-cloud-arrow-up" style="color:var(--cyan); margin-right:8px;"></i>Upload Audios (Single or Multiple)</h2>
+        <p style="font-size:0.8rem; color:var(--sub); margin-bottom:16px;">Direct master studio uploads. Select one or multiple audios at a time.</p>
+
+        <div style="max-width:600px;">
+          <div class="form-group">
+            <label>Select Audio Files (Multiple Selection Supported)</label>
+            <input type="file" id="adminMultiFileInput" accept="audio/*" multiple onchange="handleAdminFilesSelected(this)">
+          </div>
+          <div class="form-group">
+            <label>Category for Uploaded Audio(s)</label>
+            <select id="adminUploadCategory">
+              <option value="Random Plays">Random Plays (Plays continuously in general random rotation)</option>
+              <option value="Scheduled Playlist">Scheduled Playlist (Plays strictly only at scheduled timings)</option>
+            </select>
+          </div>
+          <div id="adminSelectedFilesList" style="margin-bottom:14px; font-size:0.8rem; color:var(--sub);"></div>
+          <button class="btn btn-primary" id="adminUploadBtn" onclick="uploadAdminAudios()"><i class="fa-solid fa-upload"></i> Upload in Original Quality</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 4: AUDIO APPROVALS & PREVIEW -->
     <section id="approvalsTab" class="tab-content">
       <div class="panel">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; flex-wrap:wrap; gap:10px;">
-          <div>
-            <h2 style="font-size:1.15rem;"><i class="fa-solid fa-circle-check" style="color:var(--green); margin-right:8px;"></i>Audio Approval Manager</h2>
-            <p style="font-size:0.8rem; color:var(--sub);">Preview any audio track before approving or assigning playlists.</p>
-          </div>
-          <audio id="globalPreviewPlayer" controls style="height:34px; max-width:280px; display:none;"></audio>
-        </div>
+        <h2 style="font-size:1.15rem; margin-bottom:12px;"><i class="fa-solid fa-circle-check" style="color:var(--green); margin-right:8px;"></i>Audio Approval & Preview Manager</h2>
         <div class="table-box">
           <table>
             <thead>
               <tr>
-                <th>Title & Description</th>
+                <th>Title</th>
                 <th>Length</th>
-                <th>Preview</th>
                 <th>Contributor</th>
                 <th>Category</th>
+                <th>Preview</th>
                 <th>Status</th>
                 <th>Action</th>
               </tr>
@@ -478,7 +366,7 @@
       </div>
     </section>
 
-    <!-- TAB 4: LISTENERS & USERS -->
+    <!-- TAB 5: LISTENERS & USERS -->
     <section id="liveTab" class="tab-content">
       <div class="panel">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
@@ -490,7 +378,7 @@
             <thead>
               <tr>
                 <th>Listener ID</th>
-                <th>New Member</th>
+                <th>Member Name</th>
                 <th>Status</th>
                 <th>Last Active</th>
               </tr>
@@ -520,14 +408,14 @@
       </div>
     </section>
 
-    <!-- TAB 5: BROADCAST SETTINGS -->
+    <!-- TAB 6: BROADCAST SETTINGS -->
     <section id="settingsTab" class="tab-content">
       <div class="panel">
         <h2 style="font-size:1.15rem; margin-bottom:14px;"><i class="fa-solid fa-gear" style="margin-right:8px;"></i>Radio Settings</h2>
         <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap:14px; margin-bottom:14px;">
           <div class="form-group">
             <label>Station Display Name</label>
-            <input type="text" id="cfgStationName" value="The Big Family Radio">
+            <input type="text" id="cfgStationName" value="Feel Music Radio">
           </div>
           <div class="form-group">
             <label>Station Tagline</label>
@@ -547,15 +435,11 @@
   let adminPasscode = "";
   let tracks = [];
   let users = [];
-  let hourlySchedules = {};
+  let scheduledList = [];
   let cachedListeners = [];
   let serverTimeOffset = 0;
   let activeSearchQuery = "";
-  let slotFilterQueries = {};
-
-  let replaceTargetHour = null;
-  let replaceTargetIndex = null;
-  let currentPreviewingFileId = null;
+  let adminSelectedFiles = [];
 
   let mediaRecorder = null;
   let micAudioChunks = [];
@@ -581,34 +465,6 @@
     return `${m}m ${s < 10 ? '0' : ''}${s}s`;
   }
 
-  function parseMMSS(val) {
-    if (!val) return 0;
-    const parts = String(val).split(':');
-    if (parts.length === 2) {
-      const m = parseInt(parts[0], 10) || 0;
-      const s = parseInt(parts[1], 10) || 0;
-      return Math.min(3599, Math.max(0, (m * 60) + s));
-    }
-    const num = parseInt(val, 10);
-    return isNaN(num) ? 0 : Math.min(3599, Math.max(0, num * 60));
-  }
-
-  function formatSecsToMMSS(totalSec) {
-    const m = Math.floor((totalSec % 3600) / 60);
-    const s = Math.floor(totalSec % 60);
-    return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
-  }
-
-  function formatTimeOffset(hour, offsetSec) {
-    const totalSec = (hour * 3600) + offsetSec;
-    const h = Math.floor(totalSec / 3600) % 24;
-    const m = Math.floor((totalSec % 3600) / 60);
-    const s = Math.floor(totalSec % 60);
-    const ampm = h >= 12 ? 'PM' : 'AM';
-    const dispH = h % 12 || 12;
-    return `${dispH}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')} ${ampm}`;
-  }
-
   function switchTab(tabId, btn) {
     document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
     document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
@@ -618,7 +474,7 @@
 
   function handleGlobalSearch(query) {
     activeSearchQuery = String(query || "").toLowerCase().trim();
-    renderHourlySlotsUI();
+    renderScheduledTable();
     renderLibrary();
     renderApprovals();
     renderListeners(cachedListeners);
@@ -655,7 +511,7 @@
         if (data.serverTime) serverTimeOffset = data.serverTime - Date.now();
         tracks = data.tracks || [];
         users = data.users || [];
-        hourlySchedules = normalizeHourlySchedules(data.hourly || {});
+        scheduledList = data.scheduled || [];
         cachedListeners = data.activeListeners || [];
 
         document.getElementById('authGate').style.display = 'none';
@@ -669,7 +525,8 @@
           document.getElementById('cfgStationTagline').value = data.settings.station_tagline;
         }
 
-        renderHourlySlotsUI();
+        populateScheduledTrackPicker();
+        renderScheduledTable();
         renderLibrary();
         renderApprovals();
         renderListeners(cachedListeners);
@@ -684,28 +541,6 @@
     }
   }
 
-  function normalizeHourlySchedules(raw) {
-    const norm = {};
-    for (let h = 0; h <= 23; h++) {
-      const s = raw[String(h)] || { name: "", trackEntries: [] };
-      let entries = [];
-      if (s.trackEntries && Array.isArray(s.trackEntries)) {
-        entries = s.trackEntries;
-      } else if (s.trackIds && Array.isArray(s.trackIds)) {
-        let curSec = 0;
-        entries = s.trackIds.map(id => {
-          const t = tracks.find(x => x.fileId === id);
-          const dur = t ? (t.durationSec || 140) : 140;
-          const obj = { fileId: id, startSec: curSec };
-          curSec += dur;
-          return obj;
-        });
-      }
-      norm[String(h)] = { name: s.name || "", trackEntries: entries };
-    }
-    return norm;
-  }
-
   async function refreshAdminData() {
     if (!adminPasscode) return;
     try {
@@ -714,7 +549,11 @@
       if (data.success) {
         tracks = data.tracks || [];
         users = data.users || [];
+        scheduledList = data.scheduled || [];
         cachedListeners = data.activeListeners || [];
+        populateScheduledTrackPicker();
+        renderScheduledTable();
+        renderLibrary();
         renderApprovals();
         renderListeners(cachedListeners);
         renderUsers();
@@ -722,311 +561,208 @@
     } catch(e) {}
   }
 
-  async function triggerClearAllSlots() {
-    if (!confirm("Are you sure you want to clear ALL scheduled audios across all 24 hours?")) return;
-    showToast("Clearing all 24 hourly slots...");
+  function populateScheduledTrackPicker() {
+    const sel = document.getElementById('schedTrackSelect');
+    if (!sel) return;
+    const approved = tracks.filter(t => t.approvalStatus === "approved");
+    sel.innerHTML = approved.map(t => `
+      <option value="${t.fileId}">${escapeHtml(t.title)} (${formatSecs(t.durationSec || 140)}) [${t.category}]</option>
+    `).join('');
+  }
+
+  // SCHEDULE MANAGEMENT: Exact Time Scheduling
+  async function addScheduledPlay() {
+    const exactTime = document.getElementById('schedExactTime').value.trim();
+    const slotName = document.getElementById('schedSlotName').value.trim() || "Scheduled Broadcast";
+    const fileId = document.getElementById('schedTrackSelect').value;
+
+    if (!exactTime || !fileId) return showToast("Select an exact time and audio");
+
+    showToast(`Scheduling audio for ${exactTime}...`);
     try {
       const res = await fetch(BACKEND_URL, {
         method: 'POST',
-        body: JSON.stringify({ action: "clearAllHourlySlots", adminKey: adminPasscode })
+        body: JSON.stringify({
+          action: "addScheduledItem",
+          adminKey: adminPasscode,
+          exactTime,
+          slotName,
+          fileId
+        })
       });
       const data = await res.json();
       if (data.success) {
-        for (let h = 0; h <= 23; h++) {
-          hourlySchedules[String(h)] = { name: "", trackEntries: [] };
-        }
-        renderHourlySlotsUI();
-        showToast("All slots successfully cleared!");
+        showToast(data.message);
+        refreshAdminData();
       } else {
-        showToast(data.message || "Failed to clear slots");
+        showToast(data.message || "Failed to schedule");
       }
     } catch(e) {
-      showToast("Error communicating with backend");
+      showToast("Error scheduling audio");
     }
   }
 
-  // Render each hourly slot with exact time picker
-  function renderHourlySlotsUI() {
-    const container = document.getElementById('hourlySlotsGrid');
-    if (!container) return;
-    const nowHour = new Date(Date.now() + serverTimeOffset).getHours();
-    let html = '';
-    const q = activeSearchQuery;
-    const approved = tracks.filter(t => t.approvalStatus === "approved");
-
-    for (let h = 0; h <= 23; h++) {
-      const slot = hourlySchedules[String(h)] || { name: "", trackEntries: [] };
-      const formattedHour = (h % 12 || 12) + ':00 ' + (h >= 12 ? 'PM' : 'AM') + ' – ' + ((h + 1) % 12 || 12) + ':00 ' + ((h + 1) >= 12 && (h + 1) < 24 ? 'PM' : 'AM');
-      const list = (slot.trackEntries || []).sort((a, b) => (a.startSec || 0) - (b.startSec || 0));
-      const slotName = String(slot.name || '');
-      const isLiveNow = (h === nowHour);
-
-      const slotMatchesSearch = !q || formattedHour.toLowerCase().includes(q) || slotName.toLowerCase().includes(q) || `hour ${h}`.includes(q);
-
-      let chipsHtml = '';
-      let hasMatchingChild = false;
-      let totalSlotDuration = 0;
-
-      if (list.length === 0) {
-        chipsHtml = `<span style="font-size:0.75rem; color:var(--sub); padding:6px 0;">No scheduled audios in this hour (Plays Random Plays by default).</span>`;
-      } else {
-        chipsHtml = `<div class="timeline-container">` + list.map((entry, idx) => {
-          const fileId = entry.fileId;
-          const trk = tracks.find(t => t.fileId === fileId);
-          const title = trk ? trk.title : 'Track (' + fileId + ')';
-          const contrib = trk ? (trk.contributor || '') : '';
-          const dur = trk ? (trk.durationSec || 140) : 140;
-          const cat = trk ? (trk.category === "Random Plays" ? "Random" : "Admin Sel") : "";
-          const exactTimeStr = formatTimeOffset(h, entry.startSec || 0);
-          totalSlotDuration += dur;
-
-          const trackMatches = !q || title.toLowerCase().includes(q) || contrib.toLowerCase().includes(q) || cat.toLowerCase().includes(q);
-          if (trackMatches) hasMatchingChild = true;
-
-          return `
-            <div class="track-chip" style="${q && trackMatches ? 'border-color: var(--cyan); background: rgba(0,210,255,0.1);' : ''}" onclick="openReplaceModal(${h}, ${idx})" title="Click to modify audio or time">
-              <div class="chip-left">
-                <span class="chip-time-point"><i class="fa-solid fa-clock" style="font-size:0.6rem; margin-right:3px;"></i>${exactTimeStr}</span>
-                <span class="chip-title"><strong>#${idx + 1}</strong> [${cat}] ${escapeHtml(title)}</span>
-                <span class="chip-dur">(${formatSecs(dur)})</span>
-              </div>
-              <div style="display:flex; gap:6px;" onclick="event.stopPropagation()">
-                <button class="btn btn-sm btn-secondary" onclick="openReplaceModal(${h}, ${idx})"><i class="fa-solid fa-pen"></i></button>
-                <button class="btn btn-sm btn-danger" onclick="removeTrackFromSlot(${h}, ${idx})"><i class="fa-solid fa-xmark"></i></button>
-              </div>
-            </div>
-          `;
-        }).join('') + `</div>`;
-      }
-
-      if (q && !slotMatchesSearch && !hasMatchingChild) {
-        continue;
-      }
-
-      const currentSlotQuery = (slotFilterQueries[h] || "").toLowerCase().trim();
-      const filteredForSlot = approved.filter(t => {
-        return !currentSlotQuery || String(t.title || "").toLowerCase().includes(currentSlotQuery) || String(t.contributor || "").toLowerCase().includes(currentSlotQuery);
-      });
-
-      const slotOptionsHtml = filteredForSlot.length > 0 
-        ? filteredForSlot.map(t => `<option value="${t.fileId}">${escapeHtml(t.title)} (${formatSecs(t.durationSec || 140)}) [${t.category === 'Random Plays' ? 'Random' : 'Admin'}]</option>`).join('')
-        : `<option value="">No matching tracks</option>`;
-
-      // Default next proposed start time in hour
-      const nextSuggestedSec = list.length > 0 ? ((list[list.length - 1].startSec || 0) + (tracks.find(x => x.fileId === list[list.length - 1].fileId)?.durationSec || 140)) : 0;
-      const defaultTimeMMSS = formatSecsToMMSS(Math.min(3540, nextSuggestedSec));
-
-      html += `
-        <div class="slot-row ${isLiveNow ? 'active-hour' : ''}">
-          <div class="slot-header">
-            <div class="slot-title-group">
-              <span class="slot-badge ${isLiveNow ? 'live' : ''}">${isLiveNow ? '● ON AIR NOW' : 'HOUR ' + h}</span>
-              <strong style="font-size:0.95rem;">${formattedHour}</strong>
-              <span style="font-size:0.75rem; color:var(--sub);">Total Scheduled: ${formatSecs(totalSlotDuration)}</span>
-            </div>
-            <div>
-              <input type="text" class="slot-name-field" placeholder="Slot Name" value="${escapeHtml(slotName)}" onchange="updateSlotName(${h}, this.value)">
-            </div>
-          </div>
-
-          <!-- Schedule Audio with Exact Time Picker -->
-          <div class="slot-inline-add-bar">
-            <input type="text" class="slot-search-input" id="slotSearchInput_${h}" placeholder="🔍 Search audio..." value="${escapeHtml(slotFilterQueries[h] || '')}" oninput="filterSlotTracks(${h}, this.value)">
-            <select class="slot-pick-select" id="slotTrackPick_${h}">
-              ${slotOptionsHtml}
-            </select>
-            <div style="display:flex; align-items:center; gap:4px;">
-              <span style="font-size:0.72rem; color:var(--sub);">Time:</span>
-              <input type="text" class="slot-exact-time-input" id="slotExactTime_${h}" value="${defaultTimeMMSS}" placeholder="MM:SS" title="Exact start time inside hour">
-            </div>
-            <button class="btn btn-green btn-sm" onclick="addExactTimeToSlot(${h})"><i class="fa-solid fa-plus"></i> Schedule at Exact Time</button>
-          </div>
-
-          ${chipsHtml}
-        </div>
-      `;
-    }
-    container.innerHTML = html || `<p style="color:var(--sub); font-size:0.85rem; padding:12px;">No matching hourly slots found.</p>`;
-  }
-
-  function filterSlotTracks(h, val) {
-    slotFilterQueries[h] = val;
-    const sel = document.getElementById(`slotTrackPick_${h}`);
-    if (!sel) return;
-    const q = val.toLowerCase().trim();
-    const approved = tracks.filter(t => t.approvalStatus === "approved");
-    const filtered = approved.filter(t => {
-      return !q || String(t.title || "").toLowerCase().includes(q) || String(t.contributor || "").toLowerCase().includes(q);
-    });
-    sel.innerHTML = filtered.length > 0 
-      ? filtered.map(t => `<option value="${t.fileId}">${escapeHtml(t.title)} (${formatSecs(t.durationSec || 140)}) [${t.category === 'Random Plays' ? 'Random' : 'Admin'}]</option>`).join('')
-      : `<option value="">No matching tracks</option>`;
-  }
-
-  function addExactTimeToSlot(h) {
-    const sel = document.getElementById(`slotTrackPick_${h}`);
-    const timeInput = document.getElementById(`slotExactTime_${h}`);
-    if (!sel || !sel.value) return showToast(`Select an audio track for Hour ${h}`);
-
-    const fileId = sel.value;
-    const exactSec = parseMMSS(timeInput ? timeInput.value : "00:00");
-
-    if (!hourlySchedules[String(h)]) hourlySchedules[String(h)] = { name: "", trackEntries: [] };
-    hourlySchedules[String(h)].trackEntries.push({ fileId, startSec: exactSec });
-    hourlySchedules[String(h)].trackEntries.sort((a, b) => a.startSec - b.startSec);
-
-    renderHourlySlotsUI();
-    showToast(`Track scheduled in Hour ${h} at ${formatSecsToMMSS(exactSec)}!`);
-  }
-
-  function updateSlotName(h, val) {
-    if (!hourlySchedules[String(h)]) hourlySchedules[String(h)] = { name: "", trackEntries: [] };
-    hourlySchedules[String(h)].name = val;
-  }
-
-  function removeTrackFromSlot(h, idx) {
-    if (hourlySchedules[String(h)] && hourlySchedules[String(h)].trackEntries) {
-      hourlySchedules[String(h)].trackEntries.splice(idx, 1);
-      renderHourlySlotsUI();
-      showToast("Track removed from schedule.");
-    }
-  }
-
-  function openReplaceModal(h, idx) {
-    replaceTargetHour = h;
-    replaceTargetIndex = idx;
-    const modalSel = document.getElementById('modalTrackSelector');
-    const modalTime = document.getElementById('modalTrackExactTime');
-    const approved = tracks.filter(t => t.approvalStatus === "approved");
-
-    modalSel.innerHTML = approved.map(t => {
-      const dur = formatSecs(t.durationSec || 140);
-      return `<option value="${t.fileId}">${escapeHtml(t.title)} (${dur}) [${t.category}]</option>`;
-    }).join('');
-
-    const entry = hourlySchedules[String(h)].trackEntries[idx];
-    if (entry) {
-      modalSel.value = entry.fileId;
-      modalTime.value = formatSecsToMMSS(entry.startSec || 0);
-    }
-
-    document.getElementById('replaceModal').classList.add('open');
-  }
-
-  function closeReplaceModal(e) {
-    if (!e || e.target === document.getElementById('replaceModal')) {
-      document.getElementById('replaceModal').classList.remove('open');
-    }
-  }
-
-  function confirmTrackReplacement() {
-    const newFileId = document.getElementById('modalTrackSelector').value;
-    const newSec = parseMMSS(document.getElementById('modalTrackExactTime').value);
-    if (!newFileId) return;
-
-    if (hourlySchedules[String(replaceTargetHour)] && hourlySchedules[String(replaceTargetHour)].trackEntries) {
-      hourlySchedules[String(replaceTargetHour)].trackEntries[replaceTargetIndex] = {
-        fileId: newFileId,
-        startSec: newSec
-      };
-      hourlySchedules[String(replaceTargetHour)].trackEntries.sort((a, b) => a.startSec - b.startSec);
-      renderHourlySlotsUI();
-      closeReplaceModal();
-      showToast("Schedule timing updated!");
-    }
-  }
-
-  function deleteTargetTrackFromSlot() {
-    removeTrackFromSlot(replaceTargetHour, replaceTargetIndex);
-    closeReplaceModal();
-  }
-
-  async function saveHourlySlots() {
-    showToast("Saving hourly timeline...");
+  async function deleteScheduledPlay(scheduleId) {
+    if (!confirm("Remove this scheduled play timing?")) return;
+    showToast("Removing schedule...");
     try {
       const res = await fetch(BACKEND_URL, {
         method: 'POST',
-        body: JSON.stringify({ action: "saveHourlySchedule", adminKey: adminPasscode, schedules: hourlySchedules })
+        body: JSON.stringify({ action: "deleteScheduledItem", adminKey: adminPasscode, scheduleId })
       });
       const data = await res.json();
-      showToast(data.message || "Broadcast schedule saved!");
+      if (data.success) {
+        scheduledList = scheduledList.filter(s => s.scheduleId !== scheduleId);
+        renderScheduledTable();
+        showToast("Schedule removed");
+      }
     } catch(e) {
-      showToast("Error saving schedule");
+      showToast("Error removing schedule");
     }
   }
 
-  // Admin Single & Batch Audio Upload
-  async function uploadAudiosBatch() {
-    const fileInput = document.getElementById('adminMultipleAudioInput');
-    const catSelect = document.getElementById('adminUploadCategory');
-    const statusText = document.getElementById('batchUploadStatus');
-    const btn = document.getElementById('adminBatchUploadBtn');
+  function renderScheduledTable() {
+    const tbody = document.getElementById('scheduledTableBody');
+    if (!tbody) return;
+    const q = activeSearchQuery;
 
-    if (!fileInput.files || fileInput.files.length === 0) {
-      return showToast("Please select at least one audio file.");
+    const filtered = scheduledList.filter(s => {
+      const trk = tracks.find(t => t.fileId === s.fileId);
+      const title = trk ? trk.title : '';
+      return !q || s.exactTime.toLowerCase().includes(q) || s.slotName.toLowerCase().includes(q) || title.toLowerCase().includes(q);
+    });
+
+    if (filtered.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:var(--sub);">No scheduled audios found.</td></tr>`;
+      return;
     }
 
-    const files = Array.from(fileInput.files);
-    const chosenCat = catSelect.value;
+    tbody.innerHTML = filtered.map(s => {
+      const trk = tracks.find(t => t.fileId === s.fileId);
+      const title = trk ? trk.title : 'Track (' + s.fileId + ')';
+      const dur = trk ? formatSecs(trk.durationSec || 140) : '--';
+      const cat = trk ? trk.category : 'Scheduled Playlist';
+
+      return `
+        <tr>
+          <td><code style="color:var(--cyan); font-weight:700; font-size:0.95rem;">${s.exactTime}</code></td>
+          <td><strong>${escapeHtml(s.slotName)}</strong></td>
+          <td>${escapeHtml(title)}</td>
+          <td>${dur}</td>
+          <td><span style="font-size:0.75rem; background:rgba(255,255,255,0.06); padding:2px 8px; border-radius:6px;">${cat}</span></td>
+          <td>
+            <button class="btn btn-danger btn-sm" onclick="deleteScheduledPlay('${s.scheduleId}')"><i class="fa-solid fa-trash"></i></button>
+          </td>
+        </tr>
+      `;
+    }).join('');
+  }
+
+  // ADMIN MULTIPLE AUDIO UPLOADS
+  function handleAdminFilesSelected(input) {
+    adminSelectedFiles = Array.from(input.files || []);
+    const infoBox = document.getElementById('adminSelectedFilesList');
+    if (adminSelectedFiles.length === 0) {
+      infoBox.innerHTML = '';
+      return;
+    }
+    infoBox.innerHTML = `<strong>${adminSelectedFiles.length} file(s) selected:</strong> ` + 
+      adminSelectedFiles.map(f => `${escapeHtml(f.name)} (${(f.size / (1024*1024)).toFixed(2)} MB)`).join(', ');
+  }
+
+  async function uploadAdminAudios() {
+    if (adminSelectedFiles.length === 0) return showToast("Select at least one audio file to upload");
+    const category = document.getElementById('adminUploadCategory').value;
+    const btn = document.getElementById('adminUploadBtn');
+
     btn.disabled = true;
 
-    let successful = 0;
-    for (let i = 0; i < files.length; i++) {
-      const f = files[i];
-      statusText.innerText = `Uploading ${i + 1} of ${files.length}: ${f.name}...`;
+    for (let i = 0; i < adminSelectedFiles.length; i++) {
+      const file = adminSelectedFiles[i];
+      btn.innerText = `Uploading ${i + 1} of ${adminSelectedFiles.length}: ${file.name}...`;
 
       try {
-        const base64Data = await new Promise((resolve, reject) => {
-          const reader = new FileReader();
-          reader.onload = () => resolve(reader.result.split(',')[1]);
-          reader.onerror = reject;
-          reader.readAsDataURL(f);
-        });
+        const base64Data = await readFileAsBase64(file);
+        const title = file.name.replace(/\.[^/.]+$/, "");
 
-        const durationSec = await new Promise(resolve => {
-          const a = new Audio();
-          a.src = URL.createObjectURL(f);
-          a.onloadedmetadata = () => resolve(Math.round(a.duration) || 140);
-          a.onerror = () => resolve(140);
-        });
-
-        const res = await fetch(BACKEND_URL, {
+        await fetch(BACKEND_URL, {
           method: 'POST',
           body: JSON.stringify({
             action: "uploadAudio",
-            mobile: "AdminStudio",
-            username: "Admin Studio",
-            title: f.name.replace(/\.[^/.]+$/, ""),
-            description: "Direct Admin Upload",
-            category: chosenCat,
-            fileName: f.name,
-            mimeType: f.type || "audio/mpeg",
+            adminKey: adminPasscode,
+            username: "Family Admin",
+            title,
+            description: "Direct Studio Master Upload",
+            fileName: file.name,
+            mimeType: file.type || "audio/mpeg",
             base64File: base64Data,
-            durationSec: durationSec
+            category: category,
+            durationSec: 180
           })
         });
-        const d = await res.json();
-        if (d.success) successful++;
-      } catch(err) {
-        console.warn("Upload error:", err);
+      } catch (err) {
+        console.warn("Failed upload for file:", file.name, err);
       }
     }
 
     btn.disabled = false;
-    fileInput.value = "";
-    statusText.innerText = `Uploaded ${successful} of ${files.length} audios successfully!`;
-    showToast(`Upload complete: ${successful} files added.`);
+    btn.innerHTML = `<i class="fa-solid fa-upload"></i> Upload in Original Quality`;
+    document.getElementById('adminMultiFileInput').value = '';
+    document.getElementById('adminSelectedFilesList').innerHTML = '';
+    adminSelectedFiles = [];
 
-    const resAdmin = await fetch(`${BACKEND_URL}?action=getAdminData&key=${encodeURIComponent(adminPasscode)}`);
-    const dataAdmin = await resAdmin.json();
-    if (dataAdmin.success) {
-      tracks = dataAdmin.tracks || [];
-      renderLibrary();
-      renderApprovals();
-      renderHourlySlotsUI();
+    showToast("All audios uploaded successfully in original master quality!");
+    refreshAdminData();
+  }
+
+  function readFileAsBase64(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result.split(',')[1]);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  }
+
+  // AUDIO PREVIEW
+  async function previewAudio(fileId, title) {
+    const modal = document.getElementById('previewModal');
+    const info = document.getElementById('previewTrackInfo');
+    const player = document.getElementById('previewAudioPlayer');
+
+    info.innerText = `Previewing: ${title}`;
+    player.src = "";
+    modal.classList.add('open');
+
+    showToast("Buffering audio preview...");
+    try {
+      const res = await fetch(`${BACKEND_URL}?action=streamAudio&fileId=${encodeURIComponent(fileId)}`);
+      const data = await res.json();
+      if (data.success && data.dataUri) {
+        player.src = data.dataUri;
+        player.play().catch(() => {});
+      } else {
+        const trk = tracks.find(t => t.fileId === fileId);
+        if (trk) {
+          player.src = trk.streamUrl;
+          player.play().catch(() => {});
+        }
+      }
+    } catch (e) {
+      showToast("Could not preview audio");
     }
   }
 
+  function closePreviewModal(e) {
+    if (!e || e.target === document.getElementById('previewModal')) {
+      const player = document.getElementById('previewAudioPlayer');
+      player.pause();
+      player.src = "";
+      document.getElementById('previewModal').classList.remove('open');
+    }
+  }
+
+  // LIBRARY RENDERING
   function renderLibrary() {
     const q = activeSearchQuery;
     const box = document.getElementById('libraryList');
@@ -1054,6 +790,7 @@
             </div>
           </div>
           <div style="display:flex; gap:8px;">
+            <button class="btn btn-secondary btn-sm" onclick="previewAudio('${t.fileId}', '${escapeHtml(t.title)}')"><i class="fa-solid fa-play"></i> Preview</button>
             <button class="btn btn-cyan btn-sm" ${!isApproved ? 'disabled style="opacity:0.4; cursor:not-allowed;"' : ''} onclick="pushTrackLive('${t.fileId}', '${escapeHtml(t.title)}')"><i class="fa-solid fa-bolt"></i> Push Now</button>
             <button class="btn btn-danger btn-sm" onclick="deleteTrack('${t.fileId}')"><i class="fa-solid fa-trash"></i></button>
           </div>
@@ -1088,13 +825,98 @@
       const data = await res.json();
       if (data.success) {
         tracks = tracks.filter(t => t.fileId !== fileId);
+        scheduledList = scheduledList.filter(s => s.fileId !== fileId);
         renderLibrary();
         renderApprovals();
+        renderScheduledTable();
+        populateScheduledTrackPicker();
         showToast("Deleted");
       }
     } catch(e) {
       showToast("Error deleting track");
     }
+  }
+
+  // APPROVALS & CATEGORIZATION
+  function renderApprovals() {
+    const tbody = document.getElementById('approvalsTableBody');
+    if (!tbody) return;
+    const q = activeSearchQuery;
+
+    const filtered = tracks.filter(t => {
+      return !q || String(t.title || "").toLowerCase().includes(q) || String(t.contributor || "").toLowerCase().includes(q) || String(t.category || "").toLowerCase().includes(q);
+    });
+
+    if (filtered.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:var(--sub);">No tracks found.</td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = filtered.map(t => {
+      const isApproved = (t.approvalStatus === "approved");
+      const dur = formatSecs(t.durationSec || 140);
+      return `
+        <tr>
+          <td><strong>${escapeHtml(t.title)}</strong></td>
+          <td><code style="color:var(--cyan); font-weight:700;">${dur}</code></td>
+          <td>${escapeHtml(t.contributor || 'Family Member')}</td>
+          <td>
+            <select style="background:#090d16; border:1px solid var(--border); color:#fff; padding:4px 8px; border-radius:6px; font-size:0.78rem;" onchange="changeTrackCategory('${t.fileId}', this.value)">
+              <option value="Random Plays" ${t.category === 'Random Plays' ? 'selected' : ''}>Random Plays</option>
+              <option value="Scheduled Playlist" ${t.category === 'Scheduled Playlist' ? 'selected' : ''}>Scheduled Playlist</option>
+            </select>
+          </td>
+          <td>
+            <button class="btn btn-secondary btn-sm" onclick="previewAudio('${t.fileId}', '${escapeHtml(t.title)}')"><i class="fa-solid fa-play"></i> Preview</button>
+          </td>
+          <td><span style="font-size:0.75rem; font-weight:700; color:${isApproved ? 'var(--green)' : '#ffc107'}">${t.approvalStatus || 'pending'}</span></td>
+          <td>
+            ${isApproved
+              ? `<button class="btn btn-danger btn-sm" onclick="setAudioApproval('${t.fileId}', 'pending')">Revoke</button>`
+              : `<button class="btn btn-green btn-sm" onclick="setAudioApproval('${t.fileId}', 'approved')"><i class="fa-solid fa-check"></i> Approve</button>`
+            }
+          </td>
+        </tr>
+      `;
+    }).join('');
+  }
+
+  async function setAudioApproval(fileId, status) {
+    showToast("Updating audio...");
+    try {
+      const res = await fetch(BACKEND_URL, {
+        method: 'POST',
+        body: JSON.stringify({ action: "adminUpdateAudioApproval", adminKey: adminPasscode, fileId, status })
+      });
+      const data = await res.json();
+      if (data.success) {
+        const trk = tracks.find(t => t.fileId === fileId);
+        if (trk) trk.approvalStatus = status;
+        populateScheduledTrackPicker();
+        renderApprovals();
+        renderLibrary();
+        showToast(data.message);
+      }
+    } catch(e) {
+      showToast("Error updating status");
+    }
+  }
+
+  async function changeTrackCategory(fileId, category) {
+    try {
+      const res = await fetch(BACKEND_URL, {
+        method: 'POST',
+        body: JSON.stringify({ action: "adminUpdateTrackCategory", adminKey: adminPasscode, fileId, category })
+      });
+      const data = await res.json();
+      if (data.success) {
+        const trk = tracks.find(t => t.fileId === fileId);
+        if (trk) trk.category = category;
+        populateScheduledTrackPicker();
+        renderScheduledTable();
+        showToast(data.message);
+      }
+    } catch(e) {}
   }
 
   async function toggleMicRecording() {
@@ -1153,134 +975,6 @@
     } catch(e) {
       showToast("Error broadcasting announcement");
     }
-  }
-
-  // Audio Preview & Approvals
-  function renderApprovals() {
-    const tbody = document.getElementById('approvalsTableBody');
-    if (!tbody) return;
-    const q = activeSearchQuery;
-
-    const filtered = tracks.filter(t => {
-      return !q || String(t.title || "").toLowerCase().includes(q) || String(t.contributor || "").toLowerCase().includes(q) || String(t.category || "").toLowerCase().includes(q);
-    });
-
-    if (filtered.length === 0) {
-      tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:var(--sub);">No tracks found.</td></tr>`;
-      return;
-    }
-
-    tbody.innerHTML = filtered.map(t => {
-      const isApproved = (t.approvalStatus === "approved");
-      const dur = formatSecs(t.durationSec || 140);
-      const isCurrentlyPlaying = currentPreviewingFileId === t.fileId;
-
-      return `
-        <tr>
-          <td>
-            <strong>${escapeHtml(t.title)}</strong>
-            ${t.description ? `<div style="font-size:0.74rem; color:var(--sub); margin-top:2px;">${escapeHtml(t.description)}</div>` : ''}
-          </td>
-          <td><code style="color:var(--cyan); font-weight:700;">${dur}</code></td>
-          <td>
-            <button class="btn btn-sm ${isCurrentlyPlaying ? 'btn-danger' : 'btn-secondary'}" onclick="togglePreviewAudio('${t.fileId}')">
-              <i class="fa-solid ${isCurrentlyPlaying ? 'fa-pause' : 'fa-play'}"></i> ${isCurrentlyPlaying ? 'Stop' : 'Preview'}
-            </button>
-          </td>
-          <td>${escapeHtml(t.contributor || 'Family Member')}</td>
-          <td>
-            <select style="background:#090d16; border:1px solid var(--border); color:#fff; padding:4px 8px; border-radius:6px; font-size:0.78rem;" onchange="changeTrackCategory('${t.fileId}', this.value)">
-              <option value="Admin Selections" ${t.category !== 'Random Plays' ? 'selected' : ''}>Admin Selections (Scheduled)</option>
-              <option value="Random Plays" ${t.category === 'Random Plays' ? 'selected' : ''}>Random Plays (Non-scheduled)</option>
-            </select>
-          </td>
-          <td><span style="font-size:0.75rem; font-weight:700; color:${isApproved ? 'var(--green)' : '#ffc107'}">${t.approvalStatus || 'pending'}</span></td>
-          <td>
-            ${isApproved
-              ? `<button class="btn btn-danger btn-sm" onclick="setAudioApproval('${t.fileId}', 'pending')">Revoke</button>`
-              : `<button class="btn btn-green btn-sm" onclick="setAudioApproval('${t.fileId}', 'approved')"><i class="fa-solid fa-check"></i> Approve</button>`
-            }
-          </td>
-        </tr>
-      `;
-    }).join('');
-  }
-
-  async function togglePreviewAudio(fileId) {
-    const player = document.getElementById('globalPreviewPlayer');
-    if (!player) return;
-
-    if (currentPreviewingFileId === fileId && !player.paused) {
-      player.pause();
-      currentPreviewingFileId = null;
-      renderApprovals();
-      return;
-    }
-
-    showToast("Loading audio preview...");
-    currentPreviewingFileId = fileId;
-    renderApprovals();
-
-    try {
-      const res = await fetch(`${BACKEND_URL}?action=streamAudio&fileId=${encodeURIComponent(fileId)}`);
-      const d = await res.json();
-      if (d.success && d.dataUri) {
-        player.src = d.dataUri;
-        player.style.display = "inline-block";
-        player.play();
-        player.onended = () => {
-          currentPreviewingFileId = null;
-          renderApprovals();
-        };
-      } else {
-        const trk = tracks.find(x => x.fileId === fileId);
-        if (trk && trk.streamUrl) {
-          player.src = trk.streamUrl;
-          player.style.display = "inline-block";
-          player.play();
-        }
-      }
-    } catch(e) {
-      showToast("Could not preview audio");
-      currentPreviewingFileId = null;
-      renderApprovals();
-    }
-  }
-
-  async function setAudioApproval(fileId, status) {
-    showToast("Updating audio...");
-    try {
-      const res = await fetch(BACKEND_URL, {
-        method: 'POST',
-        body: JSON.stringify({ action: "adminUpdateAudioApproval", adminKey: adminPasscode, fileId, status })
-      });
-      const data = await res.json();
-      if (data.success) {
-        const trk = tracks.find(t => t.fileId === fileId);
-        if (trk) trk.approvalStatus = status;
-        renderApprovals();
-        renderLibrary();
-        renderHourlySlotsUI();
-        showToast(data.message);
-      }
-    } catch(e) {
-      showToast("Error updating status");
-    }
-  }
-
-  async function changeTrackCategory(fileId, category) {
-    try {
-      const res = await fetch(BACKEND_URL, {
-        method: 'POST',
-        body: JSON.stringify({ action: "adminUpdateTrackCategory", adminKey: adminPasscode, fileId, category })
-      });
-      const data = await res.json();
-      if (data.success) {
-        const trk = tracks.find(t => t.fileId === fileId);
-        if (trk) trk.category = category;
-        showToast(data.message);
-      }
-    } catch(e) {}
   }
 
   function renderListeners(listeners) {
