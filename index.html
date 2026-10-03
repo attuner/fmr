@@ -202,7 +202,6 @@
       max-height: 34px;
       overflow: hidden;
       display: -webkit-box;
-      
       -webkit-box-orient: vertical;
       max-width: 92%;
     }
@@ -292,14 +291,39 @@
     .modal-card {
       width: 100%; max-width: 520px; max-height: 88vh; overflow-y: auto;
       background: #161b22; border: 1px solid var(--card-border);
-      border-radius: 20px; padding: 20px;
+      border-radius: 20px; padding: 20px; scroll-behavior: smooth;
     }
-    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; padding-bottom: 8px; border-bottom: 1px solid var(--card-border); }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; padding-bottom: 8px; border-bottom: 1px solid var(--card-border); gap: 10px; }
     .modal-close { background: none; border: none; color: var(--subtext); font-size: 1.2rem; cursor: pointer; }
+
+    /* Top guide navigation controls */
+    .guide-top-controls {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .btn-scroll-nav {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid var(--card-border);
+      color: var(--cyan);
+      border-radius: 8px;
+      padding: 5px 9px;
+      font-size: 0.74rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-weight: 600;
+      transition: background 0.2s;
+    }
+    .btn-scroll-nav:hover {
+      background: rgba(0, 210, 255, 0.15);
+      color: #fff;
+    }
 
     .sched-card {
       background: rgba(255,255,255,0.03); border: 1px solid var(--card-border);
-      border-radius: 12px; padding: 10px 14px; margin-bottom: 8px;
+      border-radius: 12px; padding: 12px 14px; margin-bottom: 8px;
       display: flex; justify-content: space-between; align-items: center;
     }
     .sched-card.active-now { border-color: var(--accent); background: rgba(255, 71, 96, 0.08); }
@@ -399,14 +423,21 @@
   </main>
 </div>
 
-<!-- Modal: Daily Guide -->
+<!-- Modal: Daily Guide (1: Scheduled Hourly Slots Timings & Slot Title Only + Scroll Up/Down Buttons) -->
 <div id="scheduleModal" class="modal-overlay" onclick="closeScheduleModal(event)">
-  <div class="modal-card" onclick="event.stopPropagation()">
+  <div class="modal-card" id="scheduleModalCard" onclick="event.stopPropagation()">
     <div class="modal-header">
-      <h3><i class="fa-solid fa-calendar-days" style="color:var(--cyan); margin-right:8px;"></i>Daily FM Broadcast Schedule</h3>
-      <button class="modal-close" onclick="closeScheduleModal()"><i class="fa-solid fa-xmark"></i></button>
+      <h3 style="font-size:1rem; display:flex; align-items:center; gap:8px;">
+        <i class="fa-solid fa-calendar-days" style="color:var(--cyan);"></i>
+        <span>Scheduled Timings</span>
+      </h3>
+      <div class="guide-top-controls">
+        <button class="btn-scroll-nav" onclick="scrollGuideTop()"><i class="fa-solid fa-arrow-up"></i> Up</button>
+        <button class="btn-scroll-nav" onclick="scrollGuideBottom()"><i class="fa-solid fa-arrow-down"></i> Down</button>
+        <button class="modal-close" style="margin-left:6px;" onclick="closeScheduleModal()"><i class="fa-solid fa-xmark"></i></button>
+      </div>
     </div>
-    <div id="scheduleTimelineList">Loading timeline...</div>
+    <div id="scheduleTimelineList">Loading scheduled timings...</div>
   </div>
 </div>
 
@@ -485,15 +516,40 @@
 <script>
   const BACKEND_URL = "https://script.google.com/macros/s/AKfycbxIM9fWOdU4skEnXuxVe6DR6FS7z-a3AdEepC4o6AS5WQiLV_lWp0EmBXCg0rSv-Mj5Cg/exec";
 
+  // 2) Open the page in full screen from the beginning page
   function requestAppFullscreen() {
     try {
       const doc = document.documentElement;
-      if (!document.fullscreenElement && !document.webkitFullscreenElement) {
-        if (doc.requestFullscreen) doc.requestFullscreen().catch(() => {});
-        else if (doc.webkitRequestFullscreen) doc.webkitRequestFullscreen().catch(() => {});
+      if (!document.fullscreenElement && !document.webkitFullscreenElement && !document.mozFullScreenElement && !document.msFullscreenElement) {
+        if (doc.requestFullscreen) {
+          doc.requestFullscreen().catch(() => {});
+        } else if (doc.webkitRequestFullscreen) {
+          doc.webkitRequestFullscreen().catch(() => {});
+        } else if (doc.mozRequestFullScreen) {
+          doc.mozRequestFullScreen().catch(() => {});
+        } else if (doc.msRequestFullscreen) {
+          doc.msRequestFullscreen().catch(() => {});
+        }
       }
     } catch (e) {}
   }
+
+  // Attempt early fullscreen execution immediately on page initialization
+  requestAppFullscreen();
+  document.addEventListener('DOMContentLoaded', requestAppFullscreen);
+
+  // Hook initial user gestures anywhere on the beginning page to guarantee fullscreen engagement
+  const earlyFullscreenEnforcer = () => {
+    requestAppFullscreen();
+    window.removeEventListener('pointerdown', earlyFullscreenEnforcer);
+    window.removeEventListener('touchstart', earlyFullscreenEnforcer);
+    window.removeEventListener('click', earlyFullscreenEnforcer);
+    window.removeEventListener('keydown', earlyFullscreenEnforcer);
+  };
+  window.addEventListener('pointerdown', earlyFullscreenEnforcer, { passive: true });
+  window.addEventListener('touchstart', earlyFullscreenEnforcer, { passive: true });
+  window.addEventListener('click', earlyFullscreenEnforcer, { passive: true });
+  window.addEventListener('keydown', earlyFullscreenEnforcer, { passive: true });
 
   let listenerId = localStorage.getItem('kr_listener_id');
   if (!listenerId) {
@@ -522,14 +578,12 @@
   standbyPlayer.crossOrigin = "anonymous";
   activePlayer.preload = "auto";
   standbyPlayer.preload = "auto";
-  // 3) Keep iOS / Android audio session active in background
   activePlayer.playsInline = true;
   standbyPlayer.playsInline = true;
   activePlayer.setAttribute("playsinline", "true");
   standbyPlayer.setAttribute("playsinline", "true");
   let isStandbyReady = false;
 
-  // Tiny silent audio payload (WAV) to keep media pipeline awake in background
   const SILENT_WAV_BASE64 = "data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=";
   const bgSilenceKeeper = document.getElementById('bgSilenceKeeper');
   if (bgSilenceKeeper) {
@@ -608,7 +662,6 @@
       requestAnimationFrame(renderFrame);
       if (!canvas) return;
 
-      // Don't waste CPU when document is hidden in background
       if (document.hidden) return;
 
       const rect = canvas.getBoundingClientRect();
@@ -657,7 +710,6 @@
     renderFrame();
   }
 
-  // 3) Keep radio playing in background when minimized or window visibility changes
   document.addEventListener("visibilitychange", () => {
     if (document.hidden) {
       if (isPlaying) {
@@ -734,30 +786,56 @@
     }
   }
 
+  // 1) Guide top scroll handlers
+  function scrollGuideTop() {
+    const card = document.getElementById('scheduleModalCard');
+    if (card) card.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function scrollGuideBottom() {
+    const card = document.getElementById('scheduleModalCard');
+    if (card) card.scrollTo({ top: card.scrollHeight, behavior: 'smooth' });
+  }
+
+  // 1) When the guide is opened, let there be only the scheduled hourly slots timings and slot title
   function renderScheduleTimeline() {
     const box = document.getElementById('scheduleTimelineList');
     const nowHour = new Date(Date.now() + serverTimeOffset).getHours();
     let html = '';
+    let scheduledCount = 0;
 
     for (let h = 0; h <= 23; h++) {
       const slot = hourlySchedules[String(h)];
-      const hasScheduledTracks = slot && slot.trackIds && slot.trackIds.length > 0;
-      const name = (hasScheduledTracks && slot.name && slot.name.trim() !== '') 
-        ? slot.name 
-        : (hasScheduledTracks ? `Sequential Program (${slot.trackIds.length} audios)` : 'Random Plays (Continuous Live Music)');
+      const hasScheduledTracks = slot && Array.isArray(slot.trackIds) && slot.trackIds.length > 0;
+      
+      // Filter: Only include explicitly scheduled hourly slots
+      if (!hasScheduledTracks) continue;
+
+      scheduledCount++;
+      const slotTitle = (slot.name && slot.name.trim() !== '') ? slot.name.trim() : `Scheduled Slot ${h % 12 || 12} ${h >= 12 ? 'PM' : 'AM'}`;
       const formattedTime = (h % 12 || 12) + ':00 ' + (h >= 12 ? 'PM' : 'AM') + ' – ' + ((h + 1) % 12 || 12) + ':00 ' + ((h + 1) >= 12 && (h + 1) < 24 ? 'PM' : 'AM');
       const isCurrent = (h === nowHour);
 
       html += `
         <div class="sched-card ${isCurrent ? 'active-now' : ''}">
           <div>
-            <div style="font-size:0.75rem; color:var(--subtext);">${formattedTime} ${isCurrent ? '• <span style="color:var(--green); font-weight:700;">LIVE ON AIR</span>' : ''}</div>
-            <div style="font-size:0.92rem; font-weight:700; color:#fff; margin-top:2px;">${escapeHtml(name)}</div>
+            <div style="font-size:0.75rem; color:var(--cyan); font-weight:700; font-family:monospace;">${formattedTime} ${isCurrent ? '• <span style="color:var(--green); font-family:inherit;">LIVE ON AIR</span>' : ''}</div>
+            <div style="font-size:0.94rem; font-weight:700; color:#fff; margin-top:3px;">${escapeHtml(slotTitle)}</div>
           </div>
-          <i class="fa-solid fa-radio" style="color:${isCurrent ? 'var(--accent)' : 'var(--subtext)'}; font-size:1.1rem;"></i>
+          <i class="fa-solid fa-clock" style="color:${isCurrent ? 'var(--accent)' : 'var(--subtext)'}; font-size:1.15rem;"></i>
         </div>
       `;
     }
+
+    if (scheduledCount === 0) {
+      html = `
+        <div style="text-align:center; padding:30px 16px; color:var(--subtext); border:1px dashed var(--card-border); border-radius:14px;">
+          <i class="fa-solid fa-calendar-xmark" style="font-size:1.8rem; margin-bottom:8px; display:block; color:var(--subtext);"></i>
+          No scheduled timings at this time. Radio is streaming continuous live music.
+        </div>
+      `;
+    }
+
     box.innerHTML = html;
   }
 
@@ -780,7 +858,6 @@
     } catch(err) {}
   }
 
-  // 2) Every audio in the hourly slots is played in sequence they are allotted
   function getSynchronizedCurrentTrackIndex(playlist) {
     if (!playlist || playlist.length === 0) return { index: 0, seekSec: 0 };
 
@@ -796,7 +873,6 @@
       cumulativeSec += duration;
     }
 
-    // Wrap around sequentially if total list finishes before 60 minutes
     const totalPlaylistDuration = cumulativeSec || 1;
     const loopSec = elapsedSecInHour % totalPlaylistDuration;
     let wrapCumulative = 0;
@@ -811,7 +887,6 @@
     return { index: 0, seekSec: 0 };
   }
 
-  // Resolves playlist retaining strict allotment sequence
   function resolveCurrentHourPlaylist() {
     const now = new Date(Date.now() + serverTimeOffset);
     const hour = now.getHours();
@@ -822,7 +897,6 @@
 
     if (slot && slot.trackIds && slot.trackIds.length > 0) {
       const scheduled = [];
-      // Strictly maintain the order in which admin allotted tracks
       slot.trackIds.forEach(id => {
         const found = allTracks.find(t => t.fileId === id && t.approvalStatus === "approved");
         if (found) scheduled.push(found);
@@ -835,7 +909,6 @@
       }
     }
 
-    // Unscheduled hours play Random Plays in fixed sequential library order
     const randomApproved = allTracks.filter(t => t.approvalStatus === "approved" && t.category === "Random Plays");
     slotBadge.innerText = `Random Plays (Live Sequence)`;
     if (randomApproved.length > 0) return randomApproved;
@@ -953,7 +1026,6 @@
   setupPlayerEvents(activePlayer);
   setupPlayerEvents(standbyPlayer);
 
-  // 2) Advance in strict sequential index order
   async function prepareStandbyTrack() {
     if (activePlaylist.length === 0) return;
     const nextIdx = (currentIndex + 1) % activePlaylist.length;
@@ -1007,7 +1079,6 @@
     isPlaying = true;
     sendHeartbeat();
 
-    // 3) Keep background playback awake
     if (bgSilenceKeeper) {
       bgSilenceKeeper.play().catch(() => {});
     }
@@ -1100,7 +1171,6 @@
     }
   }
 
-  // 3) Background media session metadata and remote action handlers
   function updateMediaSession() {
     const track = currentlyPlayingTrack || activePlaylist[currentIndex];
     if ('mediaSession' in navigator && track) {
