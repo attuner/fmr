@@ -202,7 +202,7 @@
       max-height: 34px;
       overflow: hidden;
       display: -webkit-box;
-      -webkit-line-clamp: 2;
+      
       -webkit-box-orient: vertical;
       max-width: 92%;
     }
@@ -329,6 +329,9 @@
 
 <div id="toast" class="toast"></div>
 
+<!-- Background silence keeper audio (Prevents background suspension on iOS/Android) -->
+<audio id="bgSilenceKeeper" loop playsinline preload="auto" style="display:none;"></audio>
+
 <div class="app-shell">
   <header>
     <div class="logo-group">
@@ -377,7 +380,7 @@
           <div class="track-desc" id="trackDescDisplay">Streaming audio in bit-perfect timeline sync.</div>
 
           <div class="audio-quality-badge">
-            <i class="fa-solid fa-bolt" style="color:var(--cyan);"></i> Pure Direct Stereo • Lossless Audio Pass
+            <i class="fa-solid fa-bolt" style="color:var(--cyan);"></i> Pure Direct Stereo • Background Playback Active
           </div>
 
           <div class="switch-container">
@@ -459,7 +462,6 @@
       <div id="uploadAllowedSection" style="display:none;">
         <div class="form-group">
           <label>Audio File (All Audio Formats)</label>
-          <!-- Universal audio formats including iPad/iOS -->
           <input type="file" id="audioFileInput" accept="audio/*,.mp3,.m4a,.aac,.wav,.ogg,.flac,.alac,.aiff,.caf,.webm" onchange="handleFileSelected(this)">
         </div>
         <div class="form-group">
@@ -520,7 +522,19 @@
   standbyPlayer.crossOrigin = "anonymous";
   activePlayer.preload = "auto";
   standbyPlayer.preload = "auto";
+  // 3) Keep iOS / Android audio session active in background
+  activePlayer.playsInline = true;
+  standbyPlayer.playsInline = true;
+  activePlayer.setAttribute("playsinline", "true");
+  standbyPlayer.setAttribute("playsinline", "true");
   let isStandbyReady = false;
+
+  // Tiny silent audio payload (WAV) to keep media pipeline awake in background
+  const SILENT_WAV_BASE64 = "data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=";
+  const bgSilenceKeeper = document.getElementById('bgSilenceKeeper');
+  if (bgSilenceKeeper) {
+    bgSilenceKeeper.src = SILENT_WAV_BASE64;
+  }
 
   // ================= DIRECT STEREO & VISUALIZER ENGINE =================
   let audioCtx = null;
@@ -577,7 +591,6 @@
       analyserNode.smoothingTimeConstant = 0.82;
       freqDataArray = new Uint8Array(analyserNode.frequencyBinCount);
 
-      // Direct, uncolored pure stereo path
       sourceNode1.connect(limiterNode);
       sourceNode2.connect(limiterNode);
       limiterNode.connect(analyserNode);
@@ -594,6 +607,9 @@
     function renderFrame() {
       requestAnimationFrame(renderFrame);
       if (!canvas) return;
+
+      // Don't waste CPU when document is hidden in background
+      if (document.hidden) return;
 
       const rect = canvas.getBoundingClientRect();
       const width = rect.width;
@@ -641,6 +657,25 @@
     renderFrame();
   }
 
+  // 3) Keep radio playing in background when minimized or window visibility changes
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) {
+      if (isPlaying) {
+        if (audioCtx && audioCtx.state === 'suspended') {
+          audioCtx.resume().catch(() => {});
+        }
+        if (activePlayer.paused) {
+          activePlayer.play().catch(() => {});
+        }
+      }
+    } else {
+      if (audioCtx && audioCtx.state === 'suspended') {
+        audioCtx.resume().catch(() => {});
+      }
+      resizeCanvas();
+    }
+  });
+
   window.addEventListener('load', () => {
     requestAppFullscreen();
     fetchStationData();
@@ -654,6 +689,9 @@
     const unlockAudioAndFullscreen = () => {
       requestAppFullscreen();
       ensureAudioContext();
+      if (bgSilenceKeeper && isPlaying) {
+        bgSilenceKeeper.play().catch(() => {});
+      }
       window.removeEventListener('click', unlockAudioAndFullscreen);
       window.removeEventListener('keydown', unlockAudioAndFullscreen);
       window.removeEventListener('touchstart', unlockAudioAndFullscreen);
@@ -706,7 +744,7 @@
       const hasScheduledTracks = slot && slot.trackIds && slot.trackIds.length > 0;
       const name = (hasScheduledTracks && slot.name && slot.name.trim() !== '') 
         ? slot.name 
-        : (hasScheduledTracks ? `Scheduled Block (${slot.trackIds.length} tracks)` : 'Random Plays (Continuous Live Music)');
+        : (hasScheduledTracks ? `Sequential Program (${slot.trackIds.length} audios)` : 'Random Plays (Continuous Live Music)');
       const formattedTime = (h % 12 || 12) + ':00 ' + (h >= 12 ? 'PM' : 'AM') + ' – ' + ((h + 1) % 12 || 12) + ':00 ' + ((h + 1) >= 12 && (h + 1) < 24 ? 'PM' : 'AM');
       const isCurrent = (h === nowHour);
 
@@ -742,6 +780,7 @@
     } catch(err) {}
   }
 
+  // 2) Every audio in the hourly slots is played in sequence they are allotted
   function getSynchronizedCurrentTrackIndex(playlist) {
     if (!playlist || playlist.length === 0) return { index: 0, seekSec: 0 };
 
@@ -757,6 +796,7 @@
       cumulativeSec += duration;
     }
 
+    // Wrap around sequentially if total list finishes before 60 minutes
     const totalPlaylistDuration = cumulativeSec || 1;
     const loopSec = elapsedSecInHour % totalPlaylistDuration;
     let wrapCumulative = 0;
@@ -771,7 +811,7 @@
     return { index: 0, seekSec: 0 };
   }
 
-  // Follows requirement 5: scheduled plays during assigned hour; unscheduled hours play only "Random Plays"
+  // Resolves playlist retaining strict allotment sequence
   function resolveCurrentHourPlaylist() {
     const now = new Date(Date.now() + serverTimeOffset);
     const hour = now.getHours();
@@ -782,6 +822,7 @@
 
     if (slot && slot.trackIds && slot.trackIds.length > 0) {
       const scheduled = [];
+      // Strictly maintain the order in which admin allotted tracks
       slot.trackIds.forEach(id => {
         const found = allTracks.find(t => t.fileId === id && t.approvalStatus === "approved");
         if (found) scheduled.push(found);
@@ -789,17 +830,16 @@
 
       if (scheduled.length > 0) {
         const slotName = slot.name && slot.name.trim() !== '' ? slot.name : `${hour % 12 || 12} ${hour >= 12 ? 'PM' : 'AM'} Scheduled Slot`;
-        slotBadge.innerText = `Scheduled Play: ${slotName}`;
+        slotBadge.innerText = `Scheduled Play (Sequential): ${slotName}`;
         return scheduled;
       }
     }
 
-    // Unscheduled hours play Random Plays
+    // Unscheduled hours play Random Plays in fixed sequential library order
     const randomApproved = allTracks.filter(t => t.approvalStatus === "approved" && t.category === "Random Plays");
-    slotBadge.innerText = `Random Plays (Live)`;
+    slotBadge.innerText = `Random Plays (Live Sequence)`;
     if (randomApproved.length > 0) return randomApproved;
 
-    // Fallback if none explicitly tagged
     const approved = allTracks.filter(t => t.approvalStatus === "approved");
     return approved.length > 0 ? approved : allTracks;
   }
@@ -913,6 +953,7 @@
   setupPlayerEvents(activePlayer);
   setupPlayerEvents(standbyPlayer);
 
+  // 2) Advance in strict sequential index order
   async function prepareStandbyTrack() {
     if (activePlaylist.length === 0) return;
     const nextIdx = (currentIndex + 1) % activePlaylist.length;
@@ -966,6 +1007,11 @@
     isPlaying = true;
     sendHeartbeat();
 
+    // 3) Keep background playback awake
+    if (bgSilenceKeeper) {
+      bgSilenceKeeper.play().catch(() => {});
+    }
+
     if (playPromise !== undefined) {
       playPromise.then(() => {
         if (seekSec > 0 && activePlayer.duration && seekSec < activePlayer.duration) {
@@ -992,9 +1038,11 @@
     if (isPlaying) {
       activePlayer.pause();
       standbyPlayer.pause();
+      if (bgSilenceKeeper) bgSilenceKeeper.pause();
       isPlaying = false;
       sendHeartbeat();
       updateTunerUI(currentlyPlayingTrack);
+      if ('mediaSession' in navigator) navigator.mediaSession.playbackState = "paused";
     } else {
       const syncState = getSynchronizedCurrentTrackIndex(activePlaylist);
       currentIndex = syncState.index;
@@ -1003,6 +1051,10 @@
       isPlaying = true;
       updateTunerUI(currentlyPlayingTrack);
       sendHeartbeat();
+
+      if (bgSilenceKeeper) {
+        bgSilenceKeeper.play().catch(() => {});
+      }
 
       if (playPromise !== undefined) {
         playPromise.then(() => {
@@ -1048,6 +1100,7 @@
     }
   }
 
+  // 3) Background media session metadata and remote action handlers
   function updateMediaSession() {
     const track = currentlyPlayingTrack || activePlaylist[currentIndex];
     if ('mediaSession' in navigator && track) {
@@ -1057,9 +1110,18 @@
         album: "Feel Music Radio",
         artwork: [{ src: 'https://cdn-icons-png.flaticon.com/512/3075/3075906.png', sizes: '512x512', type: 'image/png' }]
       });
-      navigator.mediaSession.setActionHandler('play', () => toggleRadio());
-      navigator.mediaSession.setActionHandler('pause', () => toggleRadio());
+      navigator.mediaSession.playbackState = isPlaying ? "playing" : "paused";
+
+      navigator.mediaSession.setActionHandler('play', () => {
+        if (!isPlaying) toggleRadio();
+      });
+      navigator.mediaSession.setActionHandler('pause', () => {
+        if (isPlaying) toggleRadio();
+      });
       navigator.mediaSession.setActionHandler('nexttrack', () => advanceTrackInstantly());
+      navigator.mediaSession.setActionHandler('stop', () => {
+        if (isPlaying) toggleRadio();
+      });
     }
   }
 
@@ -1074,7 +1136,6 @@
     document.getElementById('registerFormBox').style.display = m === 'register' ? 'block' : 'none';
   }
 
-  // 1) Title automatically filled with the upload content filename
   function handleFileSelected(input) {
     if (input.files && input.files[0]) {
       selectedAudioFile = input.files[0];
@@ -1082,7 +1143,6 @@
       a.src = URL.createObjectURL(selectedAudioFile);
       a.onloadedmetadata = () => { detectedDurationSec = Math.round(a.duration) || 140; };
       const titleInput = document.getElementById('audioTitle');
-      // Strip extension to format title cleanly
       titleInput.value = selectedAudioFile.name.replace(/\.[^/.]+$/, "");
     }
   }
@@ -1186,7 +1246,6 @@
       btn.innerText = "Upload in Original Quality";
       if (d.success) {
         showToast("Audio uploaded successfully without compression!");
-        // 1) After successfully uploaded, reset title, description and file input
         titleInput.value = "";
         if (descInput) descInput.value = "";
         fileInput.value = "";

@@ -194,7 +194,7 @@
     }
     .modal-overlay.open { display: flex; }
     .modal-card {
-      width: 100%; max-width: 500px; background: var(--surface);
+      width: 100%; max-width: 520px; background: var(--surface);
       border: 1px solid var(--border); border-radius: 18px; padding: 22px;
       box-shadow: 0 20px 40px rgba(0,0,0,0.8);
     }
@@ -228,22 +228,28 @@
 
 <div id="toast" class="toast"></div>
 
-<!-- Schedule Audio Modal -->
+<!-- Schedule Audio Modal with Audio Search Option -->
 <div id="scheduleModal" class="modal-overlay" onclick="closeScheduleModal(event)">
   <div class="modal-card" onclick="event.stopPropagation()">
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
       <h3 style="font-size:1.05rem;"><i class="fa-solid fa-calendar-plus" style="color:var(--cyan); margin-right:8px;"></i>Schedule Audio Timing</h3>
       <button onclick="closeScheduleModal()" style="background:none; border:none; color:var(--sub); font-size:1.2rem; cursor:pointer;"><i class="fa-solid fa-xmark"></i></button>
     </div>
+    
+    <!-- 1) Search and find audio to schedule -->
     <div class="form-group">
-      <label>Select Target Audio</label>
-      <select id="scheduleAudioSelector"></select>
+      <label><i class="fa-solid fa-magnifying-glass"></i> Search & Find Audio</label>
+      <input type="text" id="scheduleSearchInput" placeholder="Type title or contributor to filter list..." oninput="filterScheduleSelector(this.value)">
     </div>
+
+    <div class="form-group">
+      <label>Select Audio (Sequence will be preserved)</label>
+      <select id="scheduleAudioSelector" size="5" style="height:120px;"></select>
+    </div>
+
     <div class="form-group">
       <label>Play Hour (0 to 23)</label>
-      <select id="scheduleHourSelector">
-        <!-- 24 hourly options -->
-      </select>
+      <select id="scheduleHourSelector"></select>
     </div>
     <div class="form-group">
       <label>Slot Title / Program Name</label>
@@ -251,7 +257,7 @@
     </div>
     <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:20px;">
       <button class="btn btn-secondary btn-sm" onclick="closeScheduleModal()">Cancel</button>
-      <button class="btn btn-cyan btn-sm" onclick="applyAudioSchedule()"><i class="fa-solid fa-calendar-check"></i> Save Schedule</button>
+      <button class="btn btn-cyan btn-sm" onclick="applyAudioSchedule()"><i class="fa-solid fa-calendar-check"></i> Append to Sequence</button>
     </div>
   </div>
 </div>
@@ -287,7 +293,7 @@
           <span class="pulse-dot"></span>
           <span id="liveClockDisplay">--:--:--</span>
         </div>
-        <a href="index.html" target="_blank" class="btn btn-secondary btn-sm"><i class="fa-solid fa-arrow-up-right-from-square"></i> Open Tuner</a>
+        <a href="index_2.html" target="_blank" class="btn btn-secondary btn-sm"><i class="fa-solid fa-arrow-up-right-from-square"></i> Open Tuner</a>
       </div>
     </header>
 
@@ -315,13 +321,13 @@
       <button class="tab-btn" id="tabBtnSettings" onclick="switchTab('settingsTab', this)"><i class="fa-solid fa-sliders"></i> Settings</button>
     </nav>
 
-    <!-- TAB 1: SCHEDULED AUDIO PLAY TIMINGS ONLY (Requirement 8 & 4) -->
+    <!-- TAB 1: SCHEDULED TIMINGS -->
     <section id="scheduledTab" class="tab-content active">
       <div class="panel">
         <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:16px;">
           <div>
             <h2 style="font-size:1.15rem;"><i class="fa-solid fa-calendar-check" style="color:var(--cyan); margin-right:8px;"></i>Scheduled Audio Play Timings</h2>
-            <p style="font-size:0.8rem; color:var(--sub);">Only scheduled audios are displayed below. Unscheduled hours play from the Random Plays playlist.</p>
+            <p style="font-size:0.8rem; color:var(--sub);">Audios are played sequentially in the exact chronological sequence allotted below.</p>
           </div>
           <div style="display:flex; gap:8px; flex-wrap:wrap;">
             <button class="btn btn-cyan btn-sm" onclick="openScheduleModal()"><i class="fa-solid fa-plus"></i> Schedule Audio</button>
@@ -334,7 +340,7 @@
       </div>
     </section>
 
-    <!-- TAB 2: ADMIN UPLOAD (SINGLE & MULTIPLE AUDIOS) (Requirement 7 & 9) -->
+    <!-- TAB 2: ADMIN UPLOAD -->
     <section id="uploadTab" class="tab-content">
       <div class="panel">
         <h2 style="font-size:1.15rem; margin-bottom:6px;"><i class="fa-solid fa-cloud-arrow-up" style="color:var(--accent); margin-right:8px;"></i>Upload Audio Tracks (Single or Multiple)</h2>
@@ -342,7 +348,6 @@
 
         <div class="form-group">
           <label>Select Audio Files</label>
-          <!-- Universal audio file selector for iPad / iOS / All platforms -->
           <input type="file" id="adminMultipleFileInput" multiple accept="audio/*,.mp3,.m4a,.aac,.wav,.ogg,.flac,.alac,.aiff,.caf,.webm" onchange="handleAdminFilesSelected(this)">
         </div>
 
@@ -360,7 +365,7 @@
       </div>
     </section>
 
-    <!-- TAB 3: LIBRARY & LIVE INSTANT PUSH -->
+    <!-- TAB 3: LIBRARY -->
     <section id="libraryTab" class="tab-content">
       <div class="panel">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; flex-wrap:wrap; gap:10px;">
@@ -373,7 +378,6 @@
         <div id="libraryList">Loading library...</div>
       </div>
 
-      <!-- Live Mic Push Panel -->
       <div class="panel">
         <h2 style="font-size:1.15rem;"><i class="fa-solid fa-microphone-lines" style="color:var(--accent); margin-right:8px;"></i>Live Mic Broadcast</h2>
         <p style="font-size:0.8rem; color:var(--sub); margin-bottom:14px;">Make a real-time voice announcement and push it immediately to every active listener.</p>
@@ -385,7 +389,7 @@
       </div>
     </section>
 
-    <!-- TAB 4: AUDIO APPROVALS WITH PREVIEW (Requirement 6) -->
+    <!-- TAB 4: APPROVALS -->
     <section id="approvalsTab" class="tab-content">
       <div class="panel">
         <h2 style="font-size:1.15rem; margin-bottom:12px;"><i class="fa-solid fa-circle-check" style="color:var(--green); margin-right:8px;"></i>Audio Approval Manager</h2>
@@ -410,7 +414,7 @@
       </div>
     </section>
 
-    <!-- TAB 5: LISTENERS & USERS -->
+    <!-- TAB 5: LISTENERS -->
     <section id="liveTab" class="tab-content">
       <div class="panel">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
@@ -452,7 +456,7 @@
       </div>
     </section>
 
-    <!-- TAB 6: BROADCAST SETTINGS -->
+    <!-- TAB 6: SETTINGS -->
     <section id="settingsTab" class="tab-content">
       <div class="panel">
         <h2 style="font-size:1.15rem; margin-bottom:14px;"><i class="fa-solid fa-gear" style="margin-right:8px;"></i>Radio Settings</h2>
@@ -622,7 +626,6 @@
     } catch(e) {}
   }
 
-  // 8) Render only scheduled audio play timings
   function renderScheduledTimings() {
     const container = document.getElementById('scheduledTimingsList');
     if (!container) return;
@@ -640,7 +643,7 @@
       container.innerHTML = `
         <div style="text-align:center; padding:30px; color:var(--sub); border:1px dashed var(--border); border-radius:12px;">
           <i class="fa-solid fa-calendar-xmark" style="font-size:2rem; margin-bottom:8px; display:block; color:var(--sub);"></i>
-          No scheduled audios. All broadcast hours are currently automatically playing audios from the <strong>Random Plays</strong> playlist!
+          No scheduled audios. All broadcast hours are currently playing from <strong>Random Plays</strong>!
         </div>
       `;
       return;
@@ -665,7 +668,7 @@
           <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(255,255,255,0.03); border:1px solid var(--border); border-radius:8px; padding:8px 12px; margin-top:6px;">
             <div style="display:flex; align-items:center; gap:8px;">
               <span class="timing-badge">${pushPoint}</span>
-              <span style="font-size:0.86rem; font-weight:600;">#${idx + 1} ${escapeHtml(title)}</span>
+              <span style="font-size:0.86rem; font-weight:600;"><span style="color:var(--cyan); margin-right:4px;">Seq #${idx + 1}</span> ${escapeHtml(title)}</span>
               <span style="font-size:0.75rem; color:var(--sub);">(${formatSecs(dur)})</span>
             </div>
             <div style="display:flex; gap:6px;">
@@ -682,9 +685,9 @@
             <div>
               <span class="timing-badge">${timeRange}</span>
               <strong style="margin-left:10px; font-size:0.95rem;">${escapeHtml(slotName)}</strong>
-              <span style="font-size:0.75rem; color:var(--sub); margin-left:8px;">Total: ${formatSecs(cumSec)}</span>
+              <span style="font-size:0.75rem; color:var(--sub); margin-left:8px;">Total: ${formatSecs(cumSec)} (Plays Sequentially)</span>
             </div>
-            <button class="btn btn-danger btn-sm" onclick="clearHourSchedule(${h})"><i class="fa-solid fa-xmark"></i> Clear This Timing</button>
+            <button class="btn btn-danger btn-sm" onclick="clearHourSchedule(${h})"><i class="fa-solid fa-xmark"></i> Clear Hour</button>
           </div>
           <div>${tracksHtml}</div>
         </div>
@@ -704,10 +707,31 @@
     return `${dispH}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')} ${ampm}`;
   }
 
-  function openScheduleModal() {
+  // 1) Search and filter in scheduling modal
+  function filterScheduleSelector(filterTerm) {
     const sel = document.getElementById('scheduleAudioSelector');
+    if (!sel) return;
+    const term = String(filterTerm || "").toLowerCase().trim();
     const approved = tracks.filter(t => t.approvalStatus === "approved");
-    sel.innerHTML = approved.map(t => `<option value="${t.fileId}">${escapeHtml(t.title)} (${formatSecs(t.durationSec || 140)}) [${t.category}]</option>`).join('');
+
+    const filtered = approved.filter(t => {
+      return !term || 
+        String(t.title || "").toLowerCase().includes(term) || 
+        String(t.contributor || "").toLowerCase().includes(term) ||
+        String(t.category || "").toLowerCase().includes(term);
+    });
+
+    sel.innerHTML = filtered.length > 0
+      ? filtered.map(t => `<option value="${t.fileId}">${escapeHtml(t.title)} (${formatSecs(t.durationSec || 140)}) [${t.category}]</option>`).join('')
+      : `<option disabled>No matching audio tracks found</option>`;
+
+    if (filtered.length > 0) sel.selectedIndex = 0;
+  }
+
+  function openScheduleModal() {
+    const searchInput = document.getElementById('scheduleSearchInput');
+    if (searchInput) searchInput.value = '';
+    filterScheduleSelector('');
     document.getElementById('scheduleModal').classList.add('open');
   }
 
@@ -726,12 +750,13 @@
 
     if (!hourlySchedules[String(hour)]) hourlySchedules[String(hour)] = { name: slotTitle, trackIds: [] };
     hourlySchedules[String(hour)].name = slotTitle;
+    // Sequential allotment
     hourlySchedules[String(hour)].trackIds.push(fileId);
 
     closeScheduleModal();
     renderScheduledTimings();
     await saveHourlySlots();
-    showToast(`Audio scheduled for ${formatHourRange(hour)}!`);
+    showToast(`Audio added to Sequence for ${formatHourRange(hour)}!`);
   }
 
   async function removeScheduledTrack(h, idx) {
@@ -742,7 +767,7 @@
       }
       renderScheduledTimings();
       await saveHourlySlots();
-      showToast("Track removed from timing.");
+      showToast("Track removed from sequence.");
     }
   }
 
@@ -769,7 +794,6 @@
     }
   }
 
-  // 4) Fill slots strictly from random plays
   async function triggerAutoScheduleRandom() {
     if (!confirm("Populate all unscheduled slots using approved audios from Random Plays?")) return;
     showToast("Filling with Random Plays...");
@@ -814,7 +838,6 @@
     }
   }
 
-  // 6) Audio preview feature
   function previewTrack(fileId, title) {
     const playerBar = document.getElementById('previewBar');
     const audioEl = document.getElementById('globalPreviewAudio');
@@ -834,7 +857,6 @@
     playerBar.style.display = 'none';
   }
 
-  // 7 & 9) Multiple Audio upload & Universal iPad audio format selection
   function handleAdminFilesSelected(input) {
     adminFilesToUpload = Array.from(input.files || []);
     const previewBox = document.getElementById('adminSelectedFilesPreview');
@@ -1040,7 +1062,6 @@
     }
   }
 
-  // 6) Render approvals with Preview option
   function renderApprovals() {
     const tbody = document.getElementById('approvalsTableBody');
     if (!tbody) return;
@@ -1067,7 +1088,6 @@
           <td><code style="color:var(--cyan); font-weight:700;">${dur}</code></td>
           <td>${escapeHtml(t.contributor || 'Family Member')}</td>
           <td>
-            <!-- 5) Admin categorizes track as Random Plays or Admin Selections -->
             <select style="background:#090d16; border:1px solid var(--border); color:#fff; padding:4px 8px; border-radius:6px; font-size:0.78rem;" onchange="changeTrackCategory('${t.fileId}', this.value)">
               <option value="Random Plays" ${t.category === 'Random Plays' ? 'selected' : ''}>Random Plays</option>
               <option value="Admin Selections" ${t.category !== 'Random Plays' ? 'selected' : ''}>Admin Selections</option>
