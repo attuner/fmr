@@ -146,17 +146,16 @@
       position: relative;
     }
 
-    /* Horizontal Visualizer Stage */
     .visualizer-container {
       width: 100%;
       flex: 1;
-      min-height: 120px;
-      max-height: 260px;
+      min-height: 100px;
+      max-height: 240px;
       display: flex;
       align-items: center;
       justify-content: center;
       position: relative;
-      margin-bottom: 12px;
+      margin-bottom: 8px;
     }
 
     #visualizer-canvas {
@@ -199,7 +198,7 @@
       font-size: 0.74rem;
       color: var(--subtext);
       line-height: 1.3;
-      margin-bottom: 10px;
+      margin-bottom: 8px;
       max-height: 34px;
       overflow: hidden;
       display: -webkit-box;
@@ -208,19 +207,18 @@
       max-width: 92%;
     }
 
-    /* Pure Stereo Direct Passthrough Banner */
-    .stereo-direct-banner {
+    .audio-quality-badge {
       display: inline-flex;
       align-items: center;
       gap: 6px;
       background: rgba(0, 210, 255, 0.08);
-      border: 1px solid rgba(0, 210, 255, 0.25);
-      padding: 4px 12px;
-      border-radius: 16px;
-      margin-bottom: 12px;
-      font-size: 0.72rem;
+      border: 1px solid rgba(0, 210, 255, 0.2);
+      padding: 3px 10px;
+      border-radius: 12px;
+      font-size: 0.7rem;
       color: var(--cyan);
       font-weight: 600;
+      margin-bottom: 8px;
     }
 
     .switch-container {
@@ -280,7 +278,7 @@
       .track-contributor, .slot-indicator { font-size: 0.65rem; margin-bottom: 1px; }
       .push-indicator { margin-bottom: 3px; font-size: 0.62rem; padding: 1px 8px; }
       .track-desc { display: none; }
-      .stereo-direct-banner { margin-bottom: 4px; padding: 2px 8px; font-size: 0.66rem; }
+      .audio-quality-badge { margin-bottom: 4px; padding: 2px 8px; }
       .switch-container { min-height: auto; margin-top: 2px; }
       .main-switch-btn { width: 44px; height: 44px; font-size: 1.15rem; }
     }
@@ -306,12 +304,12 @@
     }
     .sched-card.active-now { border-color: var(--accent); background: rgba(255, 71, 96, 0.08); }
 
-    .form-group { margin-bottom: 12px; width: 100%; }
+    .form-group { margin-bottom: 12px; width: 100%; text-align: left; }
     .form-group label { display: block; font-size: 0.78rem; color: var(--subtext); margin-bottom: 4px; font-weight: 600; }
     .form-group input, .form-group textarea {
       width: 100%; padding: 10px 12px; border-radius: 10px;
       background: rgba(0, 0, 0, 0.35); border: 1px solid var(--card-border);
-      color: #fff; font-size: 0.88rem; outline: none;
+      color: #fff; font-size: 0.88rem; outline: none; font-family: inherit;
     }
     .btn {
       width: 100%; padding: 11px; border-radius: 10px; border: none;
@@ -373,15 +371,13 @@
 
         <div class="track-info-pane">
           <div class="track-title" id="trackTitleDisplay">Connecting Live...</div>
-          <div class="track-contributor" id="trackContributorDisplay">Studio Quality Playback</div>
-          <div class="slot-indicator" id="currentSlotDisplay">FM Broadcast</div>
+          <div class="track-contributor" id="trackContributorDisplay">Direct Pure Stereo Stream</div>
+          <div class="slot-indicator" id="currentSlotDisplay">FM Broadcast Block</div>
           <div class="push-indicator" id="currentPushPointDisplay">Push Point: --:--</div>
-          <div class="track-desc" id="trackDescDisplay">Streaming audio in perfect timeline sync.</div>
+          <div class="track-desc" id="trackDescDisplay">Streaming audio in bit-perfect timeline sync.</div>
 
-          <!-- Pure Stereo Direct Passthrough -->
-          <div class="stereo-direct-banner">
-            <i class="fa-solid fa-bolt" style="font-size:0.75rem;"></i>
-            <span>Pure Stereo Direct Master • Zero Downsampling</span>
+          <div class="audio-quality-badge">
+            <i class="fa-solid fa-bolt" style="color:var(--cyan);"></i> Pure Direct Stereo • Lossless Audio Pass
           </div>
 
           <div class="switch-container">
@@ -400,14 +396,14 @@
   </main>
 </div>
 
-<!-- Modal: Scheduled Play Guide -->
+<!-- Modal: Daily Guide -->
 <div id="scheduleModal" class="modal-overlay" onclick="closeScheduleModal(event)">
   <div class="modal-card" onclick="event.stopPropagation()">
     <div class="modal-header">
-      <h3><i class="fa-solid fa-calendar-days" style="color:var(--cyan); margin-right:8px;"></i>Scheduled Broadcast Guide</h3>
+      <h3><i class="fa-solid fa-calendar-days" style="color:var(--cyan); margin-right:8px;"></i>Daily FM Broadcast Schedule</h3>
       <button class="modal-close" onclick="closeScheduleModal()"><i class="fa-solid fa-xmark"></i></button>
     </div>
-    <div id="scheduleTimelineList">Loading scheduled audios...</div>
+    <div id="scheduleTimelineList">Loading timeline...</div>
   </div>
 </div>
 
@@ -462,16 +458,17 @@
 
       <div id="uploadAllowedSection" style="display:none;">
         <div class="form-group">
-          <label>Audio File (MP3, WAV, M4A, FLAC)</label>
-          <input type="file" id="audioFileInput" accept="audio/*" onchange="handleFileSelected(this)">
+          <label>Audio File (All Audio Formats)</label>
+          <!-- Universal audio formats including iPad/iOS -->
+          <input type="file" id="audioFileInput" accept="audio/*,.mp3,.m4a,.aac,.wav,.ogg,.flac,.alac,.aiff,.caf,.webm" onchange="handleFileSelected(this)">
         </div>
         <div class="form-group">
-          <label>Audio Title (Auto-filled from file)</label>
-          <input type="text" id="audioTitle" placeholder="Title will appear after choosing file">
+          <label>Audio Title</label>
+          <input type="text" id="audioTitle" placeholder="Title automatically populated">
         </div>
         <div class="form-group">
           <label>Audio Description</label>
-          <textarea id="audioDescription" rows="2" placeholder="Briefly describe this audio..."></textarea>
+          <textarea id="audioDescription" rows="2" placeholder="Briefly describe this track or dedication..."></textarea>
         </div>
         <button class="btn btn-primary" id="uploadBtn" onclick="uploadAudio()">Upload in Original Quality</button>
       </div>
@@ -503,8 +500,8 @@
   }
 
   let allTracks = [];
-  let scheduledList = [];
-  let randomPlaylist = [];
+  let hourlySchedules = {};
+  let activePlaylist = [];
   let currentIndex = 0;
   let isPlaying = false;
   let currentUser = JSON.parse(localStorage.getItem('kr_user') || 'null');
@@ -512,6 +509,7 @@
   let detectedDurationSec = 140;
   let currentSeqVersion = null;
   let lastPushVersion = null;
+  let currentActiveHour = -1;
   let currentlyPlayingTrack = null;
   let serverTimeOffset = 0;
 
@@ -524,12 +522,14 @@
   standbyPlayer.preload = "auto";
   let isStandbyReady = false;
 
-  // Direct Stereo Visualizer Pipeline (No Channel Manipulation)
+  // ================= DIRECT STEREO & VISUALIZER ENGINE =================
   let audioCtx = null;
   let sourceNode1 = null;
   let sourceNode2 = null;
+  let limiterNode = null;
   let analyserNode = null;
   let freqDataArray = null;
+  let webAudioSupported = true;
 
   const canvas = document.getElementById("visualizer-canvas");
   const ctx = canvas.getContext("2d");
@@ -556,23 +556,35 @@
 
     try {
       const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-      if (!AudioContextClass) return;
+      if (!AudioContextClass) {
+        webAudioSupported = false;
+        return;
+      }
       audioCtx = new AudioContextClass();
 
       sourceNode1 = audioCtx.createMediaElementSource(activePlayer);
       sourceNode2 = audioCtx.createMediaElementSource(standbyPlayer);
+
+      limiterNode = audioCtx.createDynamicsCompressor();
+      limiterNode.threshold.setValueAtTime(-0.5, audioCtx.currentTime);
+      limiterNode.knee.setValueAtTime(0, audioCtx.currentTime);
+      limiterNode.ratio.setValueAtTime(20.0, audioCtx.currentTime);
+      limiterNode.attack.setValueAtTime(0.001, audioCtx.currentTime);
+      limiterNode.release.setValueAtTime(0.1, audioCtx.currentTime);
 
       analyserNode = audioCtx.createAnalyser();
       analyserNode.fftSize = 128;
       analyserNode.smoothingTimeConstant = 0.82;
       freqDataArray = new Uint8Array(analyserNode.frequencyBinCount);
 
-      // Direct, untouched Stereo passthrough directly into analyser & destination
-      sourceNode1.connect(analyserNode);
-      sourceNode2.connect(analyserNode);
+      // Direct, uncolored pure stereo path
+      sourceNode1.connect(limiterNode);
+      sourceNode2.connect(limiterNode);
+      limiterNode.connect(analyserNode);
       analyserNode.connect(audioCtx.destination);
     } catch(err) {
-      console.warn("Direct stereo pipeline ready:", err);
+      console.warn("Direct Stereo AudioContext setup:", err);
+      webAudioSupported = false;
     }
   }
 
@@ -675,7 +687,7 @@
   }
 
   function openScheduleModal() {
-    renderScheduleGuide();
+    renderScheduleTimeline();
     document.getElementById('scheduleModal').classList.add('open');
   }
   function closeScheduleModal(e) {
@@ -684,34 +696,31 @@
     }
   }
 
-  function renderScheduleGuide() {
+  function renderScheduleTimeline() {
     const box = document.getElementById('scheduleTimelineList');
-    if (!scheduledList || scheduledList.length === 0) {
-      box.innerHTML = `<p style="text-align:center; color:var(--subtext); padding:20px; font-size:0.85rem;">No scheduled broadcasts set right now. Playing continuous Random Melodies!</p>`;
-      return;
-    }
+    const nowHour = new Date(Date.now() + serverTimeOffset).getHours();
+    let html = '';
 
-    const now = new Date(Date.now() + serverTimeOffset);
-    const curHHMM = String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0');
+    for (let h = 0; h <= 23; h++) {
+      const slot = hourlySchedules[String(h)];
+      const hasScheduledTracks = slot && slot.trackIds && slot.trackIds.length > 0;
+      const name = (hasScheduledTracks && slot.name && slot.name.trim() !== '') 
+        ? slot.name 
+        : (hasScheduledTracks ? `Scheduled Block (${slot.trackIds.length} tracks)` : 'Random Plays (Continuous Live Music)');
+      const formattedTime = (h % 12 || 12) + ':00 ' + (h >= 12 ? 'PM' : 'AM') + ' – ' + ((h + 1) % 12 || 12) + ':00 ' + ((h + 1) >= 12 && (h + 1) < 24 ? 'PM' : 'AM');
+      const isCurrent = (h === nowHour);
 
-    box.innerHTML = scheduledList.map(item => {
-      const trk = allTracks.find(t => t.fileId === item.fileId);
-      const title = trk ? trk.title : 'Scheduled Audio';
-      const isCurrent = item.exactTime === curHHMM;
-
-      return `
+      html += `
         <div class="sched-card ${isCurrent ? 'active-now' : ''}">
           <div>
-            <div style="font-size:0.75rem; color:var(--cyan); font-weight:700;">
-              ${item.exactTime} ${isCurrent ? '• <span style="color:var(--green)">ON AIR NOW</span>' : ''}
-            </div>
-            <div style="font-size:0.92rem; font-weight:700; color:#fff; margin-top:2px;">${escapeHtml(item.slotName)}</div>
-            <div style="font-size:0.75rem; color:var(--subtext);">${escapeHtml(title)}</div>
+            <div style="font-size:0.75rem; color:var(--subtext);">${formattedTime} ${isCurrent ? '• <span style="color:var(--green); font-weight:700;">LIVE ON AIR</span>' : ''}</div>
+            <div style="font-size:0.92rem; font-weight:700; color:#fff; margin-top:2px;">${escapeHtml(name)}</div>
           </div>
-          <i class="fa-solid fa-clock" style="color:${isCurrent ? 'var(--accent)' : 'var(--subtext)'}; font-size:1.1rem;"></i>
+          <i class="fa-solid fa-radio" style="color:${isCurrent ? 'var(--accent)' : 'var(--subtext)'}; font-size:1.1rem;"></i>
         </div>
       `;
-    }).join('');
+    }
+    box.innerHTML = html;
   }
 
   async function sendHeartbeat() {
@@ -733,45 +742,66 @@
     } catch(err) {}
   }
 
-  // Resolves whether a scheduled audio is playing at this exact minute or falls back to Random Plays
-  function resolveCurrentTrackStream() {
+  function getSynchronizedCurrentTrackIndex(playlist) {
+    if (!playlist || playlist.length === 0) return { index: 0, seekSec: 0 };
+
     const now = new Date(Date.now() + serverTimeOffset);
-    const curHHMM = String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0');
+    const elapsedSecInHour = (now.getMinutes() * 60) + now.getSeconds();
 
-    // Check if any scheduled audio is slotted for this exact minute
-    const scheduledNow = scheduledList.find(s => s.exactTime === curHHMM);
-    if (scheduledNow) {
-      const matchedTrack = allTracks.find(t => t.fileId === scheduledNow.fileId && t.approvalStatus === "approved");
-      if (matchedTrack) {
-        document.getElementById('currentSlotDisplay').innerText = `Scheduled: ${scheduledNow.slotName}`;
-        return { track: matchedTrack, seekSec: now.getSeconds(), isScheduled: true };
+    let cumulativeSec = 0;
+    for (let i = 0; i < playlist.length; i++) {
+      const duration = playlist[i].durationSec || 140;
+      if (elapsedSecInHour >= cumulativeSec && elapsedSecInHour < (cumulativeSec + duration)) {
+        return { index: i, seekSec: elapsedSecInHour - cumulativeSec };
+      }
+      cumulativeSec += duration;
+    }
+
+    const totalPlaylistDuration = cumulativeSec || 1;
+    const loopSec = elapsedSecInHour % totalPlaylistDuration;
+    let wrapCumulative = 0;
+    for (let i = 0; i < playlist.length; i++) {
+      const duration = playlist[i].durationSec || 140;
+      if (loopSec >= wrapCumulative && loopSec < (wrapCumulative + duration)) {
+        return { index: i, seekSec: loopSec - wrapCumulative };
+      }
+      wrapCumulative += duration;
+    }
+
+    return { index: 0, seekSec: 0 };
+  }
+
+  // Follows requirement 5: scheduled plays during assigned hour; unscheduled hours play only "Random Plays"
+  function resolveCurrentHourPlaylist() {
+    const now = new Date(Date.now() + serverTimeOffset);
+    const hour = now.getHours();
+    currentActiveHour = hour;
+
+    const slotBadge = document.getElementById('currentSlotDisplay');
+    const slot = hourlySchedules[String(hour)];
+
+    if (slot && slot.trackIds && slot.trackIds.length > 0) {
+      const scheduled = [];
+      slot.trackIds.forEach(id => {
+        const found = allTracks.find(t => t.fileId === id && t.approvalStatus === "approved");
+        if (found) scheduled.push(found);
+      });
+
+      if (scheduled.length > 0) {
+        const slotName = slot.name && slot.name.trim() !== '' ? slot.name : `${hour % 12 || 12} ${hour >= 12 ? 'PM' : 'AM'} Scheduled Slot`;
+        slotBadge.innerText = `Scheduled Play: ${slotName}`;
+        return scheduled;
       }
     }
 
-    // Default: continuous random playlist (approved tracks categorized as "Random Plays")
-    const approvedRandom = allTracks.filter(t => t.approvalStatus === "approved" && t.category === "Random Plays");
-    randomPlaylist = approvedRandom.length > 0 ? approvedRandom : allTracks.filter(t => t.approvalStatus === "approved");
+    // Unscheduled hours play Random Plays
+    const randomApproved = allTracks.filter(t => t.approvalStatus === "approved" && t.category === "Random Plays");
+    slotBadge.innerText = `Random Plays (Live)`;
+    if (randomApproved.length > 0) return randomApproved;
 
-    if (randomPlaylist.length === 0) return null;
-
-    document.getElementById('currentSlotDisplay').innerText = "Continuous Random Plays";
-
-    // Synchronize random stream based on timeline
-    const totalSecToday = (now.getHours() * 3600) + (now.getMinutes() * 60) + now.getSeconds();
-    let totalDur = 0;
-    randomPlaylist.forEach(t => totalDur += (t.durationSec || 140));
-    totalDur = totalDur || 1;
-
-    let loopSec = totalSecToday % totalDur;
-    let accum = 0;
-    for (let i = 0; i < randomPlaylist.length; i++) {
-      const d = randomPlaylist[i].durationSec || 140;
-      if (loopSec >= accum && loopSec < (accum + d)) {
-        return { track: randomPlaylist[i], seekSec: loopSec - accum, isScheduled: false, index: i };
-      }
-      accum += d;
-    }
-    return { track: randomPlaylist[0], seekSec: 0, isScheduled: false, index: 0 };
+    // Fallback if none explicitly tagged
+    const approved = allTracks.filter(t => t.approvalStatus === "approved");
+    return approved.length > 0 ? approved : allTracks;
   }
 
   async function fetchStationData() {
@@ -781,20 +811,24 @@
       if (data.success) {
         if (data.serverTime) serverTimeOffset = data.serverTime - Date.now();
         allTracks = data.tracks || [];
-        scheduledList = data.scheduled || [];
+        hourlySchedules = data.hourly || {};
 
         if (data.settings) {
           currentSeqVersion = data.settings.seq_version || currentSeqVersion;
           lastPushVersion = data.settings.push_version || lastPushVersion;
         }
 
-        const state = resolveCurrentTrackStream();
-        if (state && state.track) {
+        activePlaylist = resolveCurrentHourPlaylist();
+
+        if (activePlaylist.length > 0) {
           document.getElementById('stationLoadingPill').style.display = 'none';
           document.getElementById('radioPowerBtn').style.display = 'block';
-          playTrackImmediate(state.track, state.seekSec);
+
+          const syncState = getSynchronizedCurrentTrackIndex(activePlaylist);
+          currentIndex = syncState.index;
+          playCurrentTrackImmediate(syncState.seekSec);
         } else {
-          document.getElementById('stationLoadingPill').innerHTML = `<span>Audio library is empty or pending approval.</span>`;
+          document.getElementById('stationLoadingPill').innerHTML = `<span>FM library is getting ready...</span>`;
         }
       }
     } catch(e) {
@@ -803,6 +837,20 @@
   }
 
   async function checkLiveSynchronization() {
+    const now = new Date(Date.now() + serverTimeOffset);
+    const currentHour = now.getHours();
+
+    if (currentActiveHour !== -1 && currentHour !== currentActiveHour) {
+      currentActiveHour = currentHour;
+      activePlaylist = resolveCurrentHourPlaylist();
+      const syncState = getSynchronizedCurrentTrackIndex(activePlaylist);
+      currentIndex = syncState.index;
+      if (isPlaying && activePlaylist.length > 0) {
+        playCurrentTrackImmediate(syncState.seekSec);
+      }
+      return;
+    }
+
     try {
       const res = await fetch(`${BACKEND_URL}?action=getStationData`);
       const data = await res.json();
@@ -815,7 +863,9 @@
           const target = allTracks.find(t => t.fileId === pushedFileId);
           if (target) {
             showToast("Priority Broadcast: " + target.title);
-            playTrackImmediate(target, 0);
+            activePlaylist = [target, ...resolveCurrentHourPlaylist()];
+            currentIndex = 0;
+            playCurrentTrackImmediate(0);
             return;
           }
         }
@@ -823,10 +873,12 @@
         if (currentSeqVersion && data.settings.seq_version !== currentSeqVersion) {
           currentSeqVersion = data.settings.seq_version;
           allTracks = data.tracks || [];
-          scheduledList = data.scheduled || [];
-          const state = resolveCurrentTrackStream();
-          if (state && state.track && isPlaying) {
-            playTrackImmediate(state.track, state.seekSec);
+          hourlySchedules = data.hourly || {};
+          activePlaylist = resolveCurrentHourPlaylist();
+          const syncState = getSynchronizedCurrentTrackIndex(activePlaylist);
+          currentIndex = syncState.index;
+          if (isPlaying && activePlaylist.length > 0) {
+            playCurrentTrackImmediate(syncState.seekSec);
           }
         }
       }
@@ -849,22 +901,58 @@
   }
 
   function setupPlayerEvents(player) {
-    player.addEventListener('ended', () => { advanceToNextStreamTrack(); });
-    player.addEventListener('error', () => { if (isPlaying) advanceToNextStreamTrack(); });
+    player.addEventListener('timeupdate', () => {
+      if (player.duration && (player.duration - player.currentTime <= 4) && !isStandbyReady) {
+        prepareStandbyTrack();
+      }
+    });
+    player.addEventListener('ended', () => { advanceTrackInstantly(); });
+    player.addEventListener('error', () => { if (isPlaying) advanceTrackInstantly(); });
   }
 
   setupPlayerEvents(activePlayer);
   setupPlayerEvents(standbyPlayer);
 
-  async function advanceToNextStreamTrack() {
-    const state = resolveCurrentTrackStream();
-    if (state && state.track) {
-      playTrackImmediate(state.track, 0);
+  async function prepareStandbyTrack() {
+    if (activePlaylist.length === 0) return;
+    const nextIdx = (currentIndex + 1) % activePlaylist.length;
+    const nextTrack = activePlaylist[nextIdx];
+    const src = await resolveTrackAudio(nextTrack);
+    if (src) {
+      standbyPlayer.src = src;
+      standbyPlayer.load();
+      standbyPlayer._trackRef = nextTrack;
+      isStandbyReady = true;
     }
   }
 
-  async function playTrackImmediate(track, seekSec = 0) {
-    if (!track) return;
+  async function advanceTrackInstantly() {
+    if (activePlaylist.length === 0) return;
+    currentIndex = (currentIndex + 1) % activePlaylist.length;
+
+    const temp = activePlayer;
+    activePlayer = standbyPlayer;
+    standbyPlayer = temp;
+    isStandbyReady = false;
+
+    currentlyPlayingTrack = activePlayer._trackRef || activePlaylist[currentIndex];
+
+    if (!activePlayer.src || activePlayer.src === "") {
+      const src = await resolveTrackAudio(currentlyPlayingTrack);
+      activePlayer.src = src;
+      activePlayer._trackRef = currentlyPlayingTrack;
+    }
+
+    ensureAudioContext();
+
+    activePlayer.play().catch(e => console.warn(e));
+    updateMediaSession();
+    updateTunerUI(currentlyPlayingTrack);
+  }
+
+  async function playCurrentTrackImmediate(seekSec = 0) {
+    if (!activePlaylist || activePlaylist.length === 0) return;
+    const track = activePlaylist[currentIndex];
     const audioSource = await resolveTrackAudio(track);
 
     activePlayer.src = audioSource;
@@ -883,34 +971,58 @@
         if (seekSec > 0 && activePlayer.duration && seekSec < activePlayer.duration) {
           activePlayer.currentTime = seekSec;
         }
+        isStandbyReady = false;
+        prepareStandbyTrack();
         updateMediaSession();
         updateTunerUI(currentlyPlayingTrack);
-      }).catch(() => {
+      }).catch(err => {
         isPlaying = false;
         updateTunerUI(currentlyPlayingTrack);
-        showToast("Tap power button to join live broadcast.");
+        showToast("Tap power switch to join live broadcast.");
       });
     }
   }
 
   function toggleRadio() {
+    if (activePlaylist.length === 0) return;
+
     ensureAudioContext();
     requestAppFullscreen();
 
     if (isPlaying) {
       activePlayer.pause();
+      standbyPlayer.pause();
       isPlaying = false;
       sendHeartbeat();
       updateTunerUI(currentlyPlayingTrack);
     } else {
-      const state = resolveCurrentTrackStream();
-      if (state && state.track) {
-        playTrackImmediate(state.track, state.seekSec);
+      const syncState = getSynchronizedCurrentTrackIndex(activePlaylist);
+      currentIndex = syncState.index;
+
+      const playPromise = activePlayer.play();
+      isPlaying = true;
+      updateTunerUI(currentlyPlayingTrack);
+      sendHeartbeat();
+
+      if (playPromise !== undefined) {
+        playPromise.then(() => {
+          if (syncState.seekSec > 0 && activePlayer.duration && syncState.seekSec < activePlayer.duration) {
+            activePlayer.currentTime = syncState.seekSec;
+          }
+          updateMediaSession();
+          prepareStandbyTrack();
+        }).catch(err => {
+          resolveTrackAudio(currentlyPlayingTrack || activePlaylist[currentIndex]).then(src => {
+            activePlayer.src = src;
+            activePlayer.play().catch(() => {});
+          });
+        });
       }
     }
   }
 
-  function updateTunerUI(track) {
+  function updateTunerUI(trackObj) {
+    const track = trackObj || currentlyPlayingTrack || (activePlaylist ? activePlaylist[currentIndex] : null);
     const btn = document.getElementById('radioPowerBtn');
     const title = document.getElementById('trackTitleDisplay');
     const contrib = document.getElementById('trackContributorDisplay');
@@ -920,12 +1032,13 @@
     if (track) {
       title.innerText = track.title;
       contrib.innerText = "Curated by " + (track.contributor || "FM Voice");
-      desc.innerText = track.description || "Master Audio Streaming";
+      desc.innerText = track.description || "Feel Music Radio";
 
+      const sync = getSynchronizedCurrentTrackIndex(activePlaylist);
       const trackDur = track.durationSec || 140;
-      const remainSec = Math.max(0, trackDur - (activePlayer.currentTime || 0));
-      const nextPushDate = new Date(Date.now() + (remainSec * 1000));
-      pushPointDisplay.innerText = `Track Length: ${Math.floor(trackDur / 60)}m ${trackDur % 60}s | Next Shift: ${formatTimeHHMMSS(nextPushDate)}`;
+      const nextPushInSec = Math.max(0, trackDur - sync.seekSec);
+      const nextPushDate = new Date(Date.now() + (nextPushInSec * 1000));
+      pushPointDisplay.innerText = `Next Push: ${formatTimeHHMMSS(nextPushDate)} (Length: ${Math.floor(trackDur / 60)}m ${trackDur % 60}s)`;
     }
 
     if (isPlaying) {
@@ -936,16 +1049,17 @@
   }
 
   function updateMediaSession() {
-    if ('mediaSession' in navigator && currentlyPlayingTrack) {
+    const track = currentlyPlayingTrack || activePlaylist[currentIndex];
+    if ('mediaSession' in navigator && track) {
       navigator.mediaSession.metadata = new MediaMetadata({
-        title: currentlyPlayingTrack.title,
-        artist: currentlyPlayingTrack.contributor || "FM Radio",
+        title: track.title,
+        artist: track.contributor || "FM Radio",
         album: "Feel Music Radio",
         artwork: [{ src: 'https://cdn-icons-png.flaticon.com/512/3075/3075906.png', sizes: '512x512', type: 'image/png' }]
       });
       navigator.mediaSession.setActionHandler('play', () => toggleRadio());
       navigator.mediaSession.setActionHandler('pause', () => toggleRadio());
-      navigator.mediaSession.setActionHandler('nexttrack', () => advanceToNextStreamTrack());
+      navigator.mediaSession.setActionHandler('nexttrack', () => advanceTrackInstantly());
     }
   }
 
@@ -960,16 +1074,16 @@
     document.getElementById('registerFormBox').style.display = m === 'register' ? 'block' : 'none';
   }
 
-  // Auto-fill title with the content of the selected upload file
+  // 1) Title automatically filled with the upload content filename
   function handleFileSelected(input) {
     if (input.files && input.files[0]) {
       selectedAudioFile = input.files[0];
       const a = new Audio();
       a.src = URL.createObjectURL(selectedAudioFile);
       a.onloadedmetadata = () => { detectedDurationSec = Math.round(a.duration) || 140; };
-
-      const rawName = selectedAudioFile.name.replace(/\.[^/.]+$/, "");
-      document.getElementById('audioTitle').value = rawName;
+      const titleInput = document.getElementById('audioTitle');
+      // Strip extension to format title cleanly
+      titleInput.value = selectedAudioFile.name.replace(/\.[^/.]+$/, "");
     }
   }
 
@@ -1038,13 +1152,14 @@
   }
 
   async function uploadAudio() {
-    const title = document.getElementById('audioTitle').value.trim();
-    const description = document.getElementById('audioDescription').value.trim();
+    const titleInput = document.getElementById('audioTitle');
+    const descInput = document.getElementById('audioDescription');
+    const fileInput = document.getElementById('audioFileInput');
+    const title = titleInput.value.trim();
+    const description = descInput ? descInput.value.trim() : "";
     const btn = document.getElementById('uploadBtn');
 
-    if (!title || !selectedAudioFile) {
-      return showToast("Please select a file and verify the title");
-    }
+    if (!title || !selectedAudioFile) return showToast("Provide a title and select a file");
 
     btn.disabled = true;
     btn.innerText = "Uploading Original Quality Audio...";
@@ -1070,12 +1185,11 @@
       btn.disabled = false;
       btn.innerText = "Upload in Original Quality";
       if (d.success) {
-        showToast("Audio uploaded successfully!");
-
-        // Reset file and title inputs completely
-        document.getElementById('audioTitle').value = "";
-        document.getElementById('audioDescription').value = "";
-        document.getElementById('audioFileInput').value = "";
+        showToast("Audio uploaded successfully without compression!");
+        // 1) After successfully uploaded, reset title, description and file input
+        titleInput.value = "";
+        if (descInput) descInput.value = "";
+        fileInput.value = "";
         selectedAudioFile = null;
 
         closeAccountModal();

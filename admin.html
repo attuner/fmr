@@ -154,17 +154,38 @@
     .btn-secondary { background: rgba(255, 255, 255, 0.08); color: #fff; }
     .btn-sm { padding: 6px 12px; font-size: 0.76rem; border-radius: 6px; }
 
+    .sched-item-card {
+      background: var(--surface-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .sched-item-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .timing-badge {
+      background: rgba(0, 210, 255, 0.12);
+      border: 1px solid rgba(0, 210, 255, 0.35);
+      color: var(--cyan);
+      padding: 4px 10px;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      font-family: monospace;
+    }
+
     .table-box { width: 100%; overflow-x: auto; border: 1px solid var(--border); border-radius: 10px; }
     table { width: 100%; border-collapse: collapse; font-size: 0.86rem; }
     th, td { padding: 12px 14px; text-align: left; border-bottom: 1px solid var(--border); }
     th { color: var(--sub); font-size: 0.72rem; text-transform: uppercase; background: var(--surface-card); }
-
-    .form-group { margin-bottom: 14px; }
-    .form-group label { display: block; font-size: 0.78rem; color: var(--sub); margin-bottom: 6px; }
-    .form-group input, .form-group select, .form-group textarea {
-      width: 100%; padding: 10px 12px; background: #090d16; border: 1px solid var(--border);
-      border-radius: 8px; color: #fff; font-size: 0.88rem; outline: none;
-    }
 
     .modal-overlay {
       position: fixed; inset: 0; background: rgba(0,0,0,0.8);
@@ -178,6 +199,24 @@
       box-shadow: 0 20px 40px rgba(0,0,0,0.8);
     }
 
+    .form-group { margin-bottom: 14px; }
+    .form-group label { display: block; font-size: 0.78rem; color: var(--sub); margin-bottom: 6px; }
+    .form-group input, .form-group select, .form-group textarea {
+      width: 100%; padding: 10px 12px; background: #090d16; border: 1px solid var(--border);
+      border-radius: 8px; color: #fff; font-size: 0.88rem; outline: none; font-family: inherit;
+    }
+
+    .preview-player-bar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(0, 210, 255, 0.08);
+      border: 1px solid rgba(0, 210, 255, 0.2);
+      border-radius: 8px;
+      padding: 8px 12px;
+      margin-bottom: 14px;
+    }
+
     .toast {
       position: fixed; top: 20px; right: 20px; background: var(--accent);
       color: #fff; padding: 10px 18px; border-radius: 20px; font-size: 0.85rem;
@@ -189,15 +228,31 @@
 
 <div id="toast" class="toast"></div>
 
-<!-- Audio Preview Modal -->
-<div id="previewModal" class="modal-overlay" onclick="closePreviewModal(event)">
+<!-- Schedule Audio Modal -->
+<div id="scheduleModal" class="modal-overlay" onclick="closeScheduleModal(event)">
   <div class="modal-card" onclick="event.stopPropagation()">
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
-      <h3 style="font-size:1.05rem;"><i class="fa-solid fa-play" style="color:var(--cyan); margin-right:8px;"></i>Preview Audio Track</h3>
-      <button onclick="closePreviewModal()" style="background:none; border:none; color:var(--sub); font-size:1.2rem; cursor:pointer;"><i class="fa-solid fa-xmark"></i></button>
+      <h3 style="font-size:1.05rem;"><i class="fa-solid fa-calendar-plus" style="color:var(--cyan); margin-right:8px;"></i>Schedule Audio Timing</h3>
+      <button onclick="closeScheduleModal()" style="background:none; border:none; color:var(--sub); font-size:1.2rem; cursor:pointer;"><i class="fa-solid fa-xmark"></i></button>
     </div>
-    <div id="previewTrackInfo" style="margin-bottom:12px; font-size:0.9rem; font-weight:600;"></div>
-    <audio id="previewAudioPlayer" controls style="width:100%; margin-top:8px; outline:none;"></audio>
+    <div class="form-group">
+      <label>Select Target Audio</label>
+      <select id="scheduleAudioSelector"></select>
+    </div>
+    <div class="form-group">
+      <label>Play Hour (0 to 23)</label>
+      <select id="scheduleHourSelector">
+        <!-- 24 hourly options -->
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Slot Title / Program Name</label>
+      <input type="text" id="scheduleSlotTitle" placeholder="e.g. Morning Family Melodies">
+    </div>
+    <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:20px;">
+      <button class="btn btn-secondary btn-sm" onclick="closeScheduleModal()">Cancel</button>
+      <button class="btn btn-cyan btn-sm" onclick="applyAudioSchedule()"><i class="fa-solid fa-calendar-check"></i> Save Schedule</button>
+    </div>
   </div>
 </div>
 
@@ -236,72 +291,85 @@
       </div>
     </header>
 
+    <!-- Global Audio Preview Bar -->
+    <div id="previewBar" class="preview-player-bar" style="display:none;">
+      <i class="fa-solid fa-headphones" style="color:var(--cyan);"></i>
+      <span style="font-size:0.8rem; font-weight:600;" id="previewTitleDisplay">Playing Preview: </span>
+      <audio id="globalPreviewAudio" controls style="height:32px; flex:1; outline:none;"></audio>
+      <button class="btn btn-danger btn-sm" onclick="stopPreviewAudio()"><i class="fa-solid fa-stop"></i> Close Preview</button>
+    </div>
+
     <div class="global-search-bar">
       <i class="fa-solid fa-magnifying-glass"></i>
-      <input type="text" id="globalOmniSearch" placeholder="Omni-Search across schedules, tracks, approvals, and listeners..." oninput="handleGlobalSearch(this.value)">
+      <input type="text" id="globalOmniSearch" placeholder="Omni-Search across scheduled timings, tracks, approvals, and listeners..." oninput="handleGlobalSearch(this.value)">
       <button class="search-clear-btn" onclick="clearGlobalSearch()"><i class="fa-solid fa-xmark"></i></button>
     </div>
 
     <!-- Navigation Tabs -->
     <nav class="nav-tabs">
-      <button class="tab-btn active" id="tabBtnSched" onclick="switchTab('scheduledTab', this)"><i class="fa-solid fa-calendar-check"></i> Scheduled Play Timings</button>
-      <button class="tab-btn" id="tabBtnLib" onclick="switchTab('libraryTab', this)"><i class="fa-solid fa-music"></i> Audio Library & Push</button>
+      <button class="tab-btn active" id="tabBtnSched" onclick="switchTab('scheduledTab', this)"><i class="fa-solid fa-clock"></i> Scheduled Audio Play Timings</button>
       <button class="tab-btn" id="tabBtnUpload" onclick="switchTab('uploadTab', this)"><i class="fa-solid fa-cloud-arrow-up"></i> Admin Upload</button>
-      <button class="tab-btn" id="tabBtnAppr" onclick="switchTab('approvalsTab', this)"><i class="fa-solid fa-check-double"></i> Approvals & Preview</button>
-      <button class="tab-btn" id="tabBtnLive" onclick="switchTab('liveTab', this)"><i class="fa-solid fa-headphones"></i> Listeners & Family</button>
+      <button class="tab-btn" id="tabBtnLib" onclick="switchTab('libraryTab', this)"><i class="fa-solid fa-music"></i> Audio Library & Push</button>
+      <button class="tab-btn" id="tabBtnAppr" onclick="switchTab('approvalsTab', this)"><i class="fa-solid fa-check-double"></i> Approvals</button>
+      <button class="tab-btn" id="tabBtnLive" onclick="switchTab('liveTab', this)"><i class="fa-solid fa-headphones"></i> Listeners</button>
       <button class="tab-btn" id="tabBtnSettings" onclick="switchTab('settingsTab', this)"><i class="fa-solid fa-sliders"></i> Settings</button>
     </nav>
 
-    <!-- TAB 1: SCHEDULED PLAY TIMINGS (No 24h slots) -->
+    <!-- TAB 1: SCHEDULED AUDIO PLAY TIMINGS ONLY (Requirement 8 & 4) -->
     <section id="scheduledTab" class="tab-content active">
       <div class="panel">
-        <h2 style="font-size:1.15rem; margin-bottom:6px;"><i class="fa-solid fa-calendar-plus" style="color:var(--cyan); margin-right:8px;"></i>Schedule Audio by Exact Time</h2>
-        <p style="font-size:0.8rem; color:var(--sub); margin-bottom:16px;">Schedule an audio to play at an exact time. Only specifically scheduled audios are listed.</p>
-
-        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:12px; margin-bottom:14px; background:var(--surface-card); padding:16px; border-radius:12px; border:1px solid var(--border);">
-          <div class="form-group" style="margin:0;">
-            <label>Exact Play Time (HH:MM)</label>
-            <input type="time" id="schedExactTime">
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:16px;">
+          <div>
+            <h2 style="font-size:1.15rem;"><i class="fa-solid fa-calendar-check" style="color:var(--cyan); margin-right:8px;"></i>Scheduled Audio Play Timings</h2>
+            <p style="font-size:0.8rem; color:var(--sub);">Only scheduled audios are displayed below. Unscheduled hours play from the Random Plays playlist.</p>
           </div>
-          <div class="form-group" style="margin:0;">
-            <label>Broadcast Slot / Event Name</label>
-            <input type="text" id="schedSlotName" placeholder="e.g. Morning Bhajans, Late Night Jazz">
-          </div>
-          <div class="form-group" style="margin:0;">
-            <label>Select Audio from Library</label>
-            <select id="schedTrackSelect"></select>
-          </div>
-          <div style="display:flex; align-items:flex-end;">
-            <button class="btn btn-green" style="width:100%; height:40px; justify-content:center;" onclick="addScheduledPlay()"><i class="fa-solid fa-plus"></i> Push Schedule</button>
+          <div style="display:flex; gap:8px; flex-wrap:wrap;">
+            <button class="btn btn-cyan btn-sm" onclick="openScheduleModal()"><i class="fa-solid fa-plus"></i> Schedule Audio</button>
+            <button class="btn btn-purple btn-sm" onclick="triggerAutoScheduleRandom()"><i class="fa-solid fa-shuffle"></i> Fill Unscheduled with Random Plays</button>
+            <button class="btn btn-danger btn-sm" onclick="triggerClearAllSlots()"><i class="fa-solid fa-trash-can"></i> Clear All Schedules</button>
           </div>
         </div>
 
-        <h3 style="font-size:0.95rem; margin-bottom:10px; margin-top:20px;">Active Scheduled Play Timings</h3>
-        <div class="table-box">
-          <table>
-            <thead>
-              <tr>
-                <th>Exact Time</th>
-                <th>Slot Name</th>
-                <th>Scheduled Audio</th>
-                <th>Duration</th>
-                <th>Category</th>
-                <th>Action</th>
-              </tr>
-            </thead>
-            <tbody id="scheduledTableBody">
-              <tr><td colspan="6" style="text-align:center; color:var(--sub);">No scheduled audios found.</td></tr>
-            </tbody>
-          </table>
-        </div>
+        <div id="scheduledTimingsList">Loading scheduled audios...</div>
       </div>
     </section>
 
-    <!-- TAB 2: LIBRARY & LIVE INSTANT PUSH -->
+    <!-- TAB 2: ADMIN UPLOAD (SINGLE & MULTIPLE AUDIOS) (Requirement 7 & 9) -->
+    <section id="uploadTab" class="tab-content">
+      <div class="panel">
+        <h2 style="font-size:1.15rem; margin-bottom:6px;"><i class="fa-solid fa-cloud-arrow-up" style="color:var(--accent); margin-right:8px;"></i>Upload Audio Tracks (Single or Multiple)</h2>
+        <p style="font-size:0.8rem; color:var(--sub); margin-bottom:16px;">Select single or multiple audio files. Compatible with iPad, iPhone, Android, and Desktop.</p>
+
+        <div class="form-group">
+          <label>Select Audio Files</label>
+          <!-- Universal audio file selector for iPad / iOS / All platforms -->
+          <input type="file" id="adminMultipleFileInput" multiple accept="audio/*,.mp3,.m4a,.aac,.wav,.ogg,.flac,.alac,.aiff,.caf,.webm" onchange="handleAdminFilesSelected(this)">
+        </div>
+
+        <div class="form-group">
+          <label>Default Category</label>
+          <select id="adminUploadCategory">
+            <option value="Random Plays">Random Plays</option>
+            <option value="Admin Selections">Admin Selections</option>
+          </select>
+        </div>
+
+        <div id="adminSelectedFilesPreview" style="margin-bottom:14px; font-size:0.82rem; color:var(--sub);"></div>
+
+        <button class="btn btn-primary" id="adminBatchUploadBtn" onclick="uploadAdminAudios()"><i class="fa-solid fa-upload"></i> Upload Selected Audio(s)</button>
+      </div>
+    </section>
+
+    <!-- TAB 3: LIBRARY & LIVE INSTANT PUSH -->
     <section id="libraryTab" class="tab-content">
       <div class="panel">
-        <h2 style="font-size:1.15rem; margin-bottom:4px;"><i class="fa-solid fa-compact-disc" style="color:var(--accent); margin-right:8px;"></i>Audio Library & Urgent Live Push</h2>
-        <p style="font-size:0.8rem; color:var(--sub); margin-bottom:14px;">Approved audios. Pushing a track immediately broadcasts it across all listeners.</p>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; flex-wrap:wrap; gap:10px;">
+          <div>
+            <h2 style="font-size:1.15rem;"><i class="fa-solid fa-compact-disc" style="color:var(--accent); margin-right:8px;"></i>Chronological Library & Urgent Push</h2>
+            <p style="font-size:0.8rem; color:var(--sub);">All approved audios. Pushing a track immediately broadcasts it across all radios.</p>
+          </div>
+        </div>
+
         <div id="libraryList">Loading library...</div>
       </div>
 
@@ -317,43 +385,19 @@
       </div>
     </section>
 
-    <!-- TAB 3: ADMIN MULTIPLE AUDIO UPLOADS -->
-    <section id="uploadTab" class="tab-content">
-      <div class="panel">
-        <h2 style="font-size:1.15rem; margin-bottom:6px;"><i class="fa-solid fa-cloud-arrow-up" style="color:var(--cyan); margin-right:8px;"></i>Upload Audios (Single or Multiple)</h2>
-        <p style="font-size:0.8rem; color:var(--sub); margin-bottom:16px;">Direct master studio uploads. Select one or multiple audios at a time.</p>
-
-        <div style="max-width:600px;">
-          <div class="form-group">
-            <label>Select Audio Files (Multiple Selection Supported)</label>
-            <input type="file" id="adminMultiFileInput" accept="audio/*" multiple onchange="handleAdminFilesSelected(this)">
-          </div>
-          <div class="form-group">
-            <label>Category for Uploaded Audio(s)</label>
-            <select id="adminUploadCategory">
-              <option value="Random Plays">Random Plays (Plays continuously in general random rotation)</option>
-              <option value="Scheduled Playlist">Scheduled Playlist (Plays strictly only at scheduled timings)</option>
-            </select>
-          </div>
-          <div id="adminSelectedFilesList" style="margin-bottom:14px; font-size:0.8rem; color:var(--sub);"></div>
-          <button class="btn btn-primary" id="adminUploadBtn" onclick="uploadAdminAudios()"><i class="fa-solid fa-upload"></i> Upload in Original Quality</button>
-        </div>
-      </div>
-    </section>
-
-    <!-- TAB 4: AUDIO APPROVALS & PREVIEW -->
+    <!-- TAB 4: AUDIO APPROVALS WITH PREVIEW (Requirement 6) -->
     <section id="approvalsTab" class="tab-content">
       <div class="panel">
-        <h2 style="font-size:1.15rem; margin-bottom:12px;"><i class="fa-solid fa-circle-check" style="color:var(--green); margin-right:8px;"></i>Audio Approval & Preview Manager</h2>
+        <h2 style="font-size:1.15rem; margin-bottom:12px;"><i class="fa-solid fa-circle-check" style="color:var(--green); margin-right:8px;"></i>Audio Approval Manager</h2>
         <div class="table-box">
           <table>
             <thead>
               <tr>
+                <th>Preview</th>
                 <th>Title</th>
                 <th>Length</th>
                 <th>Contributor</th>
                 <th>Category</th>
-                <th>Preview</th>
                 <th>Status</th>
                 <th>Action</th>
               </tr>
@@ -378,7 +422,7 @@
             <thead>
               <tr>
                 <th>Listener ID</th>
-                <th>Member Name</th>
+                <th>Name</th>
                 <th>Status</th>
                 <th>Last Active</th>
               </tr>
@@ -415,7 +459,7 @@
         <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap:14px; margin-bottom:14px;">
           <div class="form-group">
             <label>Station Display Name</label>
-            <input type="text" id="cfgStationName" value="Feel Music Radio">
+            <input type="text" id="cfgStationName" value="The Big Family Radio">
           </div>
           <div class="form-group">
             <label>Station Tagline</label>
@@ -435,11 +479,12 @@
   let adminPasscode = "";
   let tracks = [];
   let users = [];
-  let scheduledList = [];
+  let hourlySchedules = {};
   let cachedListeners = [];
   let serverTimeOffset = 0;
   let activeSearchQuery = "";
-  let adminSelectedFiles = [];
+
+  let adminFilesToUpload = [];
 
   let mediaRecorder = null;
   let micAudioChunks = [];
@@ -465,6 +510,14 @@
     return `${m}m ${s < 10 ? '0' : ''}${s}s`;
   }
 
+  function formatHourRange(h) {
+    h = Number(h);
+    const start = (h % 12 || 12) + ':00 ' + (h >= 12 ? 'PM' : 'AM');
+    const endHour = (h + 1) % 24;
+    const end = (endHour % 12 || 12) + ':00 ' + (endHour >= 12 ? 'PM' : 'AM');
+    return `${start} – ${end}`;
+  }
+
   function switchTab(tabId, btn) {
     document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
     document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
@@ -474,7 +527,7 @@
 
   function handleGlobalSearch(query) {
     activeSearchQuery = String(query || "").toLowerCase().trim();
-    renderScheduledTable();
+    renderScheduledTimings();
     renderLibrary();
     renderApprovals();
     renderListeners(cachedListeners);
@@ -499,6 +552,18 @@
     }
   }, 1000);
 
+  function populateHourOptions() {
+    const sel = document.getElementById('scheduleHourSelector');
+    if (!sel) return;
+    sel.innerHTML = '';
+    for (let h = 0; h <= 23; h++) {
+      const opt = document.createElement('option');
+      opt.value = h;
+      opt.innerText = `Hour ${h} (${formatHourRange(h)})`;
+      sel.appendChild(opt);
+    }
+  }
+
   async function verifyAdmin() {
     const pass = document.getElementById('adminPasscode').value.trim();
     if (!pass) return showToast("Enter passcode");
@@ -511,7 +576,7 @@
         if (data.serverTime) serverTimeOffset = data.serverTime - Date.now();
         tracks = data.tracks || [];
         users = data.users || [];
-        scheduledList = data.scheduled || [];
+        hourlySchedules = data.hourly || {};
         cachedListeners = data.activeListeners || [];
 
         document.getElementById('authGate').style.display = 'none';
@@ -525,8 +590,8 @@
           document.getElementById('cfgStationTagline').value = data.settings.station_tagline;
         }
 
-        populateScheduledTrackPicker();
-        renderScheduledTable();
+        populateHourOptions();
+        renderScheduledTimings();
         renderLibrary();
         renderApprovals();
         renderListeners(cachedListeners);
@@ -549,11 +614,7 @@
       if (data.success) {
         tracks = data.tracks || [];
         users = data.users || [];
-        scheduledList = data.scheduled || [];
         cachedListeners = data.activeListeners || [];
-        populateScheduledTrackPicker();
-        renderScheduledTable();
-        renderLibrary();
         renderApprovals();
         renderListeners(cachedListeners);
         renderUsers();
@@ -561,157 +622,273 @@
     } catch(e) {}
   }
 
-  function populateScheduledTrackPicker() {
-    const sel = document.getElementById('schedTrackSelect');
-    if (!sel) return;
-    const approved = tracks.filter(t => t.approvalStatus === "approved");
-    sel.innerHTML = approved.map(t => `
-      <option value="${t.fileId}">${escapeHtml(t.title)} (${formatSecs(t.durationSec || 140)}) [${t.category}]</option>
-    `).join('');
-  }
-
-  // SCHEDULE MANAGEMENT: Exact Time Scheduling
-  async function addScheduledPlay() {
-    const exactTime = document.getElementById('schedExactTime').value.trim();
-    const slotName = document.getElementById('schedSlotName').value.trim() || "Scheduled Broadcast";
-    const fileId = document.getElementById('schedTrackSelect').value;
-
-    if (!exactTime || !fileId) return showToast("Select an exact time and audio");
-
-    showToast(`Scheduling audio for ${exactTime}...`);
-    try {
-      const res = await fetch(BACKEND_URL, {
-        method: 'POST',
-        body: JSON.stringify({
-          action: "addScheduledItem",
-          adminKey: adminPasscode,
-          exactTime,
-          slotName,
-          fileId
-        })
-      });
-      const data = await res.json();
-      if (data.success) {
-        showToast(data.message);
-        refreshAdminData();
-      } else {
-        showToast(data.message || "Failed to schedule");
-      }
-    } catch(e) {
-      showToast("Error scheduling audio");
-    }
-  }
-
-  async function deleteScheduledPlay(scheduleId) {
-    if (!confirm("Remove this scheduled play timing?")) return;
-    showToast("Removing schedule...");
-    try {
-      const res = await fetch(BACKEND_URL, {
-        method: 'POST',
-        body: JSON.stringify({ action: "deleteScheduledItem", adminKey: adminPasscode, scheduleId })
-      });
-      const data = await res.json();
-      if (data.success) {
-        scheduledList = scheduledList.filter(s => s.scheduleId !== scheduleId);
-        renderScheduledTable();
-        showToast("Schedule removed");
-      }
-    } catch(e) {
-      showToast("Error removing schedule");
-    }
-  }
-
-  function renderScheduledTable() {
-    const tbody = document.getElementById('scheduledTableBody');
-    if (!tbody) return;
+  // 8) Render only scheduled audio play timings
+  function renderScheduledTimings() {
+    const container = document.getElementById('scheduledTimingsList');
+    if (!container) return;
     const q = activeSearchQuery;
 
-    const filtered = scheduledList.filter(s => {
-      const trk = tracks.find(t => t.fileId === s.fileId);
-      const title = trk ? trk.title : '';
-      return !q || s.exactTime.toLowerCase().includes(q) || s.slotName.toLowerCase().includes(q) || title.toLowerCase().includes(q);
+    let scheduledHours = [];
+    for (let h = 0; h <= 23; h++) {
+      const slot = hourlySchedules[String(h)];
+      if (slot && slot.trackIds && slot.trackIds.length > 0) {
+        scheduledHours.push(h);
+      }
+    }
+
+    if (scheduledHours.length === 0) {
+      container.innerHTML = `
+        <div style="text-align:center; padding:30px; color:var(--sub); border:1px dashed var(--border); border-radius:12px;">
+          <i class="fa-solid fa-calendar-xmark" style="font-size:2rem; margin-bottom:8px; display:block; color:var(--sub);"></i>
+          No scheduled audios. All broadcast hours are currently automatically playing audios from the <strong>Random Plays</strong> playlist!
+        </div>
+      `;
+      return;
+    }
+
+    let html = '';
+    scheduledHours.forEach(h => {
+      const slot = hourlySchedules[String(h)];
+      const timeRange = formatHourRange(h);
+      const slotName = slot.name || `Scheduled Block`;
+      const list = slot.trackIds || [];
+
+      let cumSec = 0;
+      const tracksHtml = list.map((id, idx) => {
+        const trk = tracks.find(t => t.fileId === id);
+        const title = trk ? trk.title : `Track (${id})`;
+        const dur = trk ? (trk.durationSec || 140) : 140;
+        const pushPoint = formatTimeOffset(h, cumSec);
+        cumSec += dur;
+
+        return `
+          <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(255,255,255,0.03); border:1px solid var(--border); border-radius:8px; padding:8px 12px; margin-top:6px;">
+            <div style="display:flex; align-items:center; gap:8px;">
+              <span class="timing-badge">${pushPoint}</span>
+              <span style="font-size:0.86rem; font-weight:600;">#${idx + 1} ${escapeHtml(title)}</span>
+              <span style="font-size:0.75rem; color:var(--sub);">(${formatSecs(dur)})</span>
+            </div>
+            <div style="display:flex; gap:6px;">
+              <button class="btn btn-secondary btn-sm" onclick="previewTrack('${id}', '${escapeHtml(title)}')"><i class="fa-solid fa-play"></i></button>
+              <button class="btn btn-danger btn-sm" onclick="removeScheduledTrack(${h}, ${idx})"><i class="fa-solid fa-trash"></i></button>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      html += `
+        <div class="sched-item-card">
+          <div class="sched-item-header">
+            <div>
+              <span class="timing-badge">${timeRange}</span>
+              <strong style="margin-left:10px; font-size:0.95rem;">${escapeHtml(slotName)}</strong>
+              <span style="font-size:0.75rem; color:var(--sub); margin-left:8px;">Total: ${formatSecs(cumSec)}</span>
+            </div>
+            <button class="btn btn-danger btn-sm" onclick="clearHourSchedule(${h})"><i class="fa-solid fa-xmark"></i> Clear This Timing</button>
+          </div>
+          <div>${tracksHtml}</div>
+        </div>
+      `;
     });
 
-    if (filtered.length === 0) {
-      tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:var(--sub);">No scheduled audios found.</td></tr>`;
-      return;
-    }
-
-    tbody.innerHTML = filtered.map(s => {
-      const trk = tracks.find(t => t.fileId === s.fileId);
-      const title = trk ? trk.title : 'Track (' + s.fileId + ')';
-      const dur = trk ? formatSecs(trk.durationSec || 140) : '--';
-      const cat = trk ? trk.category : 'Scheduled Playlist';
-
-      return `
-        <tr>
-          <td><code style="color:var(--cyan); font-weight:700; font-size:0.95rem;">${s.exactTime}</code></td>
-          <td><strong>${escapeHtml(s.slotName)}</strong></td>
-          <td>${escapeHtml(title)}</td>
-          <td>${dur}</td>
-          <td><span style="font-size:0.75rem; background:rgba(255,255,255,0.06); padding:2px 8px; border-radius:6px;">${cat}</span></td>
-          <td>
-            <button class="btn btn-danger btn-sm" onclick="deleteScheduledPlay('${s.scheduleId}')"><i class="fa-solid fa-trash"></i></button>
-          </td>
-        </tr>
-      `;
-    }).join('');
+    container.innerHTML = html;
   }
 
-  // ADMIN MULTIPLE AUDIO UPLOADS
+  function formatTimeOffset(hour, offsetSec) {
+    const totalSec = (hour * 3600) + offsetSec;
+    const h = Math.floor(totalSec / 3600) % 24;
+    const m = Math.floor((totalSec % 3600) / 60);
+    const s = Math.floor(totalSec % 60);
+    const ampm = h >= 12 ? 'PM' : 'AM';
+    const dispH = h % 12 || 12;
+    return `${dispH}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')} ${ampm}`;
+  }
+
+  function openScheduleModal() {
+    const sel = document.getElementById('scheduleAudioSelector');
+    const approved = tracks.filter(t => t.approvalStatus === "approved");
+    sel.innerHTML = approved.map(t => `<option value="${t.fileId}">${escapeHtml(t.title)} (${formatSecs(t.durationSec || 140)}) [${t.category}]</option>`).join('');
+    document.getElementById('scheduleModal').classList.add('open');
+  }
+
+  function closeScheduleModal(e) {
+    if (!e || e.target === document.getElementById('scheduleModal')) {
+      document.getElementById('scheduleModal').classList.remove('open');
+    }
+  }
+
+  async function applyAudioSchedule() {
+    const fileId = document.getElementById('scheduleAudioSelector').value;
+    const hour = document.getElementById('scheduleHourSelector').value;
+    const slotTitle = document.getElementById('scheduleSlotTitle').value.trim() || `Scheduled Program (${formatHourRange(hour)})`;
+
+    if (!fileId) return showToast("Select an audio to schedule");
+
+    if (!hourlySchedules[String(hour)]) hourlySchedules[String(hour)] = { name: slotTitle, trackIds: [] };
+    hourlySchedules[String(hour)].name = slotTitle;
+    hourlySchedules[String(hour)].trackIds.push(fileId);
+
+    closeScheduleModal();
+    renderScheduledTimings();
+    await saveHourlySlots();
+    showToast(`Audio scheduled for ${formatHourRange(hour)}!`);
+  }
+
+  async function removeScheduledTrack(h, idx) {
+    if (hourlySchedules[String(h)] && hourlySchedules[String(h)].trackIds) {
+      hourlySchedules[String(h)].trackIds.splice(idx, 1);
+      if (hourlySchedules[String(h)].trackIds.length === 0) {
+        delete hourlySchedules[String(h)];
+      }
+      renderScheduledTimings();
+      await saveHourlySlots();
+      showToast("Track removed from timing.");
+    }
+  }
+
+  async function clearHourSchedule(h) {
+    if (hourlySchedules[String(h)]) {
+      delete hourlySchedules[String(h)];
+      renderScheduledTimings();
+      await saveHourlySlots();
+      showToast(`Cleared schedule for Hour ${h}`);
+    }
+  }
+
+  async function saveHourlySlots() {
+    try {
+      const res = await fetch(BACKEND_URL, {
+        method: 'POST',
+        body: JSON.stringify({ action: "saveHourlySchedule", adminKey: adminPasscode, schedules: hourlySchedules })
+      });
+      const data = await res.json();
+      return data.success;
+    } catch(e) {
+      showToast("Error updating schedule");
+      return false;
+    }
+  }
+
+  // 4) Fill slots strictly from random plays
+  async function triggerAutoScheduleRandom() {
+    if (!confirm("Populate all unscheduled slots using approved audios from Random Plays?")) return;
+    showToast("Filling with Random Plays...");
+    try {
+      const res = await fetch(BACKEND_URL, {
+        method: 'POST',
+        body: JSON.stringify({ action: "autoScheduleAllRandom", adminKey: adminPasscode })
+      });
+      const data = await res.json();
+      if (data.success) {
+        showToast(data.message || "Populated with Random Plays!");
+        const resAdmin = await fetch(`${BACKEND_URL}?action=getAdminData&key=${encodeURIComponent(adminPasscode)}`);
+        const dataAdmin = await resAdmin.json();
+        if (dataAdmin.success) {
+          hourlySchedules = dataAdmin.hourly || {};
+          renderScheduledTimings();
+        }
+      } else {
+        showToast(data.message || "Auto-schedule failed");
+      }
+    } catch(e) {
+      showToast("Error executing auto-schedule");
+    }
+  }
+
+  async function triggerClearAllSlots() {
+    if (!confirm("Are you sure you want to clear ALL scheduled timings? Unscheduled hours will continue continuous live playback from Random Plays.")) return;
+    showToast("Clearing schedules...");
+    try {
+      const res = await fetch(BACKEND_URL, {
+        method: 'POST',
+        body: JSON.stringify({ action: "clearAllHourlySlots", adminKey: adminPasscode })
+      });
+      const data = await res.json();
+      if (data.success) {
+        hourlySchedules = {};
+        renderScheduledTimings();
+        showToast("All scheduled timings cleared!");
+      }
+    } catch(e) {
+      showToast("Error communicating with backend");
+    }
+  }
+
+  // 6) Audio preview feature
+  function previewTrack(fileId, title) {
+    const playerBar = document.getElementById('previewBar');
+    const audioEl = document.getElementById('globalPreviewAudio');
+    const titleEl = document.getElementById('previewTitleDisplay');
+
+    titleEl.innerText = `Preview: ${title}`;
+    audioEl.src = `${BACKEND_URL}?action=streamAudio&fileId=${encodeURIComponent(fileId)}`;
+    playerBar.style.display = 'flex';
+    audioEl.play().catch(() => {});
+  }
+
+  function stopPreviewAudio() {
+    const playerBar = document.getElementById('previewBar');
+    const audioEl = document.getElementById('globalPreviewAudio');
+    audioEl.pause();
+    audioEl.src = "";
+    playerBar.style.display = 'none';
+  }
+
+  // 7 & 9) Multiple Audio upload & Universal iPad audio format selection
   function handleAdminFilesSelected(input) {
-    adminSelectedFiles = Array.from(input.files || []);
-    const infoBox = document.getElementById('adminSelectedFilesList');
-    if (adminSelectedFiles.length === 0) {
-      infoBox.innerHTML = '';
+    adminFilesToUpload = Array.from(input.files || []);
+    const previewBox = document.getElementById('adminSelectedFilesPreview');
+    if (adminFilesToUpload.length === 0) {
+      previewBox.innerHTML = '';
       return;
     }
-    infoBox.innerHTML = `<strong>${adminSelectedFiles.length} file(s) selected:</strong> ` + 
-      adminSelectedFiles.map(f => `${escapeHtml(f.name)} (${(f.size / (1024*1024)).toFixed(2)} MB)`).join(', ');
+    previewBox.innerHTML = `<strong>Selected ${adminFilesToUpload.length} file(s):</strong><br>` + 
+      adminFilesToUpload.map((f, i) => `${i + 1}. ${escapeHtml(f.name)} (${(f.size / (1024 * 1024)).toFixed(2)} MB)`).join('<br>');
   }
 
   async function uploadAdminAudios() {
-    if (adminSelectedFiles.length === 0) return showToast("Select at least one audio file to upload");
+    if (adminFilesToUpload.length === 0) return showToast("Select at least one audio file to upload");
     const category = document.getElementById('adminUploadCategory').value;
-    const btn = document.getElementById('adminUploadBtn');
+    const btn = document.getElementById('adminBatchUploadBtn');
 
     btn.disabled = true;
 
-    for (let i = 0; i < adminSelectedFiles.length; i++) {
-      const file = adminSelectedFiles[i];
-      btn.innerText = `Uploading ${i + 1} of ${adminSelectedFiles.length}: ${file.name}...`;
+    for (let i = 0; i < adminFilesToUpload.length; i++) {
+      const file = adminFilesToUpload[i];
+      btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Uploading ${i + 1} of ${adminFilesToUpload.length}...`;
 
       try {
         const base64Data = await readFileAsBase64(file);
-        const title = file.name.replace(/\.[^/.]+$/, "");
+        const durationSec = await detectAudioDuration(file);
 
         await fetch(BACKEND_URL, {
           method: 'POST',
           body: JSON.stringify({
             action: "uploadAudio",
-            adminKey: adminPasscode,
-            username: "Family Admin",
-            title,
-            description: "Direct Studio Master Upload",
+            mobile: "Admin",
+            username: "Admin",
+            title: file.name.replace(/\.[^/.]+$/, ""),
+            description: "Direct Admin Upload",
             fileName: file.name,
             mimeType: file.type || "audio/mpeg",
             base64File: base64Data,
+            durationSec: durationSec,
             category: category,
-            durationSec: 180
+            adminKey: adminPasscode
           })
         });
-      } catch (err) {
-        console.warn("Failed upload for file:", file.name, err);
+      } catch(e) {
+        console.error("Failed uploading file:", file.name, e);
       }
     }
 
     btn.disabled = false;
-    btn.innerHTML = `<i class="fa-solid fa-upload"></i> Upload in Original Quality`;
-    document.getElementById('adminMultiFileInput').value = '';
-    document.getElementById('adminSelectedFilesList').innerHTML = '';
-    adminSelectedFiles = [];
+    btn.innerHTML = `<i class="fa-solid fa-upload"></i> Upload Selected Audio(s)`;
+    document.getElementById('adminMultipleFileInput').value = '';
+    document.getElementById('adminSelectedFilesPreview').innerHTML = '';
+    adminFilesToUpload = [];
 
-    showToast("All audios uploaded successfully in original master quality!");
+    showToast("All audio files uploaded successfully!");
     refreshAdminData();
   }
 
@@ -724,45 +901,15 @@
     });
   }
 
-  // AUDIO PREVIEW
-  async function previewAudio(fileId, title) {
-    const modal = document.getElementById('previewModal');
-    const info = document.getElementById('previewTrackInfo');
-    const player = document.getElementById('previewAudioPlayer');
-
-    info.innerText = `Previewing: ${title}`;
-    player.src = "";
-    modal.classList.add('open');
-
-    showToast("Buffering audio preview...");
-    try {
-      const res = await fetch(`${BACKEND_URL}?action=streamAudio&fileId=${encodeURIComponent(fileId)}`);
-      const data = await res.json();
-      if (data.success && data.dataUri) {
-        player.src = data.dataUri;
-        player.play().catch(() => {});
-      } else {
-        const trk = tracks.find(t => t.fileId === fileId);
-        if (trk) {
-          player.src = trk.streamUrl;
-          player.play().catch(() => {});
-        }
-      }
-    } catch (e) {
-      showToast("Could not preview audio");
-    }
+  function detectAudioDuration(file) {
+    return new Promise(resolve => {
+      const a = new Audio();
+      a.src = URL.createObjectURL(file);
+      a.onloadedmetadata = () => resolve(Math.round(a.duration) || 140);
+      a.onerror = () => resolve(140);
+    });
   }
 
-  function closePreviewModal(e) {
-    if (!e || e.target === document.getElementById('previewModal')) {
-      const player = document.getElementById('previewAudioPlayer');
-      player.pause();
-      player.src = "";
-      document.getElementById('previewModal').classList.remove('open');
-    }
-  }
-
-  // LIBRARY RENDERING
   function renderLibrary() {
     const q = activeSearchQuery;
     const box = document.getElementById('libraryList');
@@ -790,7 +937,7 @@
             </div>
           </div>
           <div style="display:flex; gap:8px;">
-            <button class="btn btn-secondary btn-sm" onclick="previewAudio('${t.fileId}', '${escapeHtml(t.title)}')"><i class="fa-solid fa-play"></i> Preview</button>
+            <button class="btn btn-secondary btn-sm" onclick="previewTrack('${t.fileId}', '${escapeHtml(t.title)}')"><i class="fa-solid fa-play"></i> Preview</button>
             <button class="btn btn-cyan btn-sm" ${!isApproved ? 'disabled style="opacity:0.4; cursor:not-allowed;"' : ''} onclick="pushTrackLive('${t.fileId}', '${escapeHtml(t.title)}')"><i class="fa-solid fa-bolt"></i> Push Now</button>
             <button class="btn btn-danger btn-sm" onclick="deleteTrack('${t.fileId}')"><i class="fa-solid fa-trash"></i></button>
           </div>
@@ -825,98 +972,14 @@
       const data = await res.json();
       if (data.success) {
         tracks = tracks.filter(t => t.fileId !== fileId);
-        scheduledList = scheduledList.filter(s => s.fileId !== fileId);
         renderLibrary();
         renderApprovals();
-        renderScheduledTable();
-        populateScheduledTrackPicker();
+        renderScheduledTimings();
         showToast("Deleted");
       }
     } catch(e) {
       showToast("Error deleting track");
     }
-  }
-
-  // APPROVALS & CATEGORIZATION
-  function renderApprovals() {
-    const tbody = document.getElementById('approvalsTableBody');
-    if (!tbody) return;
-    const q = activeSearchQuery;
-
-    const filtered = tracks.filter(t => {
-      return !q || String(t.title || "").toLowerCase().includes(q) || String(t.contributor || "").toLowerCase().includes(q) || String(t.category || "").toLowerCase().includes(q);
-    });
-
-    if (filtered.length === 0) {
-      tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:var(--sub);">No tracks found.</td></tr>`;
-      return;
-    }
-
-    tbody.innerHTML = filtered.map(t => {
-      const isApproved = (t.approvalStatus === "approved");
-      const dur = formatSecs(t.durationSec || 140);
-      return `
-        <tr>
-          <td><strong>${escapeHtml(t.title)}</strong></td>
-          <td><code style="color:var(--cyan); font-weight:700;">${dur}</code></td>
-          <td>${escapeHtml(t.contributor || 'Family Member')}</td>
-          <td>
-            <select style="background:#090d16; border:1px solid var(--border); color:#fff; padding:4px 8px; border-radius:6px; font-size:0.78rem;" onchange="changeTrackCategory('${t.fileId}', this.value)">
-              <option value="Random Plays" ${t.category === 'Random Plays' ? 'selected' : ''}>Random Plays</option>
-              <option value="Scheduled Playlist" ${t.category === 'Scheduled Playlist' ? 'selected' : ''}>Scheduled Playlist</option>
-            </select>
-          </td>
-          <td>
-            <button class="btn btn-secondary btn-sm" onclick="previewAudio('${t.fileId}', '${escapeHtml(t.title)}')"><i class="fa-solid fa-play"></i> Preview</button>
-          </td>
-          <td><span style="font-size:0.75rem; font-weight:700; color:${isApproved ? 'var(--green)' : '#ffc107'}">${t.approvalStatus || 'pending'}</span></td>
-          <td>
-            ${isApproved
-              ? `<button class="btn btn-danger btn-sm" onclick="setAudioApproval('${t.fileId}', 'pending')">Revoke</button>`
-              : `<button class="btn btn-green btn-sm" onclick="setAudioApproval('${t.fileId}', 'approved')"><i class="fa-solid fa-check"></i> Approve</button>`
-            }
-          </td>
-        </tr>
-      `;
-    }).join('');
-  }
-
-  async function setAudioApproval(fileId, status) {
-    showToast("Updating audio...");
-    try {
-      const res = await fetch(BACKEND_URL, {
-        method: 'POST',
-        body: JSON.stringify({ action: "adminUpdateAudioApproval", adminKey: adminPasscode, fileId, status })
-      });
-      const data = await res.json();
-      if (data.success) {
-        const trk = tracks.find(t => t.fileId === fileId);
-        if (trk) trk.approvalStatus = status;
-        populateScheduledTrackPicker();
-        renderApprovals();
-        renderLibrary();
-        showToast(data.message);
-      }
-    } catch(e) {
-      showToast("Error updating status");
-    }
-  }
-
-  async function changeTrackCategory(fileId, category) {
-    try {
-      const res = await fetch(BACKEND_URL, {
-        method: 'POST',
-        body: JSON.stringify({ action: "adminUpdateTrackCategory", adminKey: adminPasscode, fileId, category })
-      });
-      const data = await res.json();
-      if (data.success) {
-        const trk = tracks.find(t => t.fileId === fileId);
-        if (trk) trk.category = category;
-        populateScheduledTrackPicker();
-        renderScheduledTable();
-        showToast(data.message);
-      }
-    } catch(e) {}
   }
 
   async function toggleMicRecording() {
@@ -975,6 +1038,86 @@
     } catch(e) {
       showToast("Error broadcasting announcement");
     }
+  }
+
+  // 6) Render approvals with Preview option
+  function renderApprovals() {
+    const tbody = document.getElementById('approvalsTableBody');
+    if (!tbody) return;
+    const q = activeSearchQuery;
+
+    const filtered = tracks.filter(t => {
+      return !q || String(t.title || "").toLowerCase().includes(q) || String(t.contributor || "").toLowerCase().includes(q) || String(t.category || "").toLowerCase().includes(q);
+    });
+
+    if (filtered.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:var(--sub);">No tracks found.</td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = filtered.map(t => {
+      const isApproved = (t.approvalStatus === "approved");
+      const dur = formatSecs(t.durationSec || 140);
+      return `
+        <tr>
+          <td>
+            <button class="btn btn-secondary btn-sm" onclick="previewTrack('${t.fileId}', '${escapeHtml(t.title)}')"><i class="fa-solid fa-play"></i></button>
+          </td>
+          <td><strong>${escapeHtml(t.title)}</strong></td>
+          <td><code style="color:var(--cyan); font-weight:700;">${dur}</code></td>
+          <td>${escapeHtml(t.contributor || 'Family Member')}</td>
+          <td>
+            <!-- 5) Admin categorizes track as Random Plays or Admin Selections -->
+            <select style="background:#090d16; border:1px solid var(--border); color:#fff; padding:4px 8px; border-radius:6px; font-size:0.78rem;" onchange="changeTrackCategory('${t.fileId}', this.value)">
+              <option value="Random Plays" ${t.category === 'Random Plays' ? 'selected' : ''}>Random Plays</option>
+              <option value="Admin Selections" ${t.category !== 'Random Plays' ? 'selected' : ''}>Admin Selections</option>
+            </select>
+          </td>
+          <td><span style="font-size:0.75rem; font-weight:700; color:${isApproved ? 'var(--green)' : '#ffc107'}">${t.approvalStatus || 'pending'}</span></td>
+          <td>
+            ${isApproved
+              ? `<button class="btn btn-danger btn-sm" onclick="setAudioApproval('${t.fileId}', 'pending')">Revoke</button>`
+              : `<button class="btn btn-green btn-sm" onclick="setAudioApproval('${t.fileId}', 'approved')"><i class="fa-solid fa-check"></i> Approve</button>`
+            }
+          </td>
+        </tr>
+      `;
+    }).join('');
+  }
+
+  async function setAudioApproval(fileId, status) {
+    showToast("Updating audio...");
+    try {
+      const res = await fetch(BACKEND_URL, {
+        method: 'POST',
+        body: JSON.stringify({ action: "adminUpdateAudioApproval", adminKey: adminPasscode, fileId, status })
+      });
+      const data = await res.json();
+      if (data.success) {
+        const trk = tracks.find(t => t.fileId === fileId);
+        if (trk) trk.approvalStatus = status;
+        renderApprovals();
+        renderLibrary();
+        showToast(data.message);
+      }
+    } catch(e) {
+      showToast("Error updating status");
+    }
+  }
+
+  async function changeTrackCategory(fileId, category) {
+    try {
+      const res = await fetch(BACKEND_URL, {
+        method: 'POST',
+        body: JSON.stringify({ action: "adminUpdateTrackCategory", adminKey: adminPasscode, fileId, category })
+      });
+      const data = await res.json();
+      if (data.success) {
+        const trk = tracks.find(t => t.fileId === fileId);
+        if (trk) trk.category = category;
+        showToast(data.message);
+      }
+    } catch(e) {}
   }
 
   function renderListeners(listeners) {
